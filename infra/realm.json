@@ -1,0 +1,84 @@
+{
+  "realm": "industrial",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "erp-web",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "${WEB_ORIGIN}/*"
+      ],
+      "webOrigins": [
+        "${WEB_ORIGIN}"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "erp-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "erp-api",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "username": "lider",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "lider@example.invalid",
+      "firstName": "lider",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@example.invalid",
+      "firstName": "admin",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "username": "operador",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "operador@example.invalid",
+      "firstName": "operador",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}

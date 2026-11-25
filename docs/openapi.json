@@ -1,0 +1,855 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ERP Industrial",
+    "version": "0.1.0"
+  },
+  "security": [
+    {
+      "bearer": []
+    }
+  ],
+  "paths": {
+    "/api/ready": {
+      "get": {
+        "summary": "Consultar migrações aplicadas",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "migrations": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "migrations"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/sectors/{sector}/team": {
+      "get": {
+        "summary": "Consultar equipe ativa de um setor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sector",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/suspension": {
+      "post": {
+        "summary": "Suspender conta na próxima operação",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalog/{kind}": {
+      "get": {
+        "summary": "Listar cadastros por tipo",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Item"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar cadastro",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Kind"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/catalog/{kind}/{id}": {
+      "put": {
+        "summary": "Atualizar cadastro",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Kind"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product}/drafts": {
+      "post": {
+        "summary": "Criar rascunho",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Draft"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sheet"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product}/drafts/{id}": {
+      "put": {
+        "summary": "Atualizar revisão do rascunho",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Draft"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer"
+                  },
+                  "sheet": {
+                    "$ref": "#/components/schemas/Sheet"
+                  }
+                },
+                "required": [
+                  "revision",
+                  "sheet"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product}/drafts/{id}/publication": {
+      "post": {
+        "summary": "Publicar revisão de forma idempotente",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "revision"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{product}/versions": {
+      "get": {
+        "summary": "Listar versões do produto",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        }
+      }
+    },
+    "/api/products/{product}/versions/{version}": {
+      "get": {
+        "summary": "Consultar composição e roteiro históricos",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "product",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação concluída",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Publication"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem acesso efetivo"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de código ou revisão"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ItemInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dimension": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "Kind": {
+        "type": "string",
+        "enum": [
+          "category",
+          "unit",
+          "material",
+          "product",
+          "part"
+        ]
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/Kind"
+          },
+          "value": {
+            "$ref": "#/components/schemas/ItemInput"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "value"
+        ]
+      },
+      "PieceLine": {
+        "type": "object",
+        "properties": {
+          "partId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "description": "Ordem de execução por peça"
+          },
+          "thicknessMm": {
+            "type": "number",
+            "nullable": true
+          },
+          "piecesPerPlate": {
+            "type": "integer",
+            "nullable": true
+          },
+          "piecesPerCut": {
+            "type": "integer",
+            "nullable": true
+          },
+          "minutesPerCut": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "partId",
+          "quantity",
+          "steps"
+        ]
+      },
+      "MaterialLine": {
+        "type": "object",
+        "properties": {
+          "materialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": true
+          }
+        },
+        "required": [
+          "materialId",
+          "unitId",
+          "quantity"
+        ]
+      },
+      "Sheet": {
+        "type": "object",
+        "properties": {
+          "pieces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PieceLine"
+            },
+            "minItems": 1
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaterialLine"
+            }
+          }
+        },
+        "required": [
+          "pieces",
+          "materials"
+        ]
+      },
+      "Draft": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "sheet": {
+            "$ref": "#/components/schemas/Sheet"
+          }
+        },
+        "required": [
+          "id",
+          "revision",
+          "sheet"
+        ]
+      },
+      "Publication": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "integer"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Item"
+          },
+          "sheet": {
+            "$ref": "#/components/schemas/Sheet"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "material": {
+                  "$ref": "#/components/schemas/Item"
+                },
+                "category": {
+                  "$ref": "#/components/schemas/Item"
+                },
+                "unit": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              },
+              "required": [
+                "material",
+                "category",
+                "unit"
+              ]
+            }
+          }
+        },
+        "required": [
+          "version",
+          "actor",
+          "publishedAt",
+          "product",
+          "sheet",
+          "parts",
+          "materials"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font:
+    16px/1.5 "Segoe UI",
+    system-ui,
+    sans-serif;
+  color: #183c38;
+  background: #f4f6f2;
+}
+header,
+nav,
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+header {
+  padding: 1rem 4vw;
+  background: #143c38;
+  color: white;
+}
+header strong {
+  margin-right: auto;
+}
+button,
+input,
+select {
+  font: inherit;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #8ca39c;
+  border-radius: 0.35rem;
+}
+button {
+  cursor: pointer;
+  color: white;
+  background: #245950;
+}
+button[aria-current] {
+  background: #fff;
+  color: #143c38;
+}
+main {
+  max-width: 980px;
+  margin: auto;
+  padding: 1.5rem;
+}
+section,
+fieldset {
+  background: white;
+  border: 1px solid #d5dfd9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+label {
+  display: inline-grid;
+  gap: 0.2rem;
+  margin: 0.4rem 0.7rem 0.65rem 0;
+}
+h1,
+h2 {
+  line-height: 1.2;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+td,
+th {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+p[role="status"]:empty {
+  display: none;
+}
+button:disabled {
+  opacity: 0.5;
+}
+input,
+select {
+  max-width: 100%;
+}

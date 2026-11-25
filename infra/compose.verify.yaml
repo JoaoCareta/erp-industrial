@@ -1,0 +1,7 @@
+services:
+  db:
+    volumes: !override []
+    tmpfs:
+      - /var/lib/postgresql/data
+    environment:
+      POSTGRES_INITDB_ARGS: --no-sync
