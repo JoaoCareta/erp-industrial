@@ -65,6 +65,46 @@ h1,
 h2 {
   line-height: 1.2;
 }
+.team-query {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+.team-query > label {
+  margin: 0;
+  position: relative;
+  width: 210px;
+  max-width: 100%;
+  min-width: 0;
+  gap: 5px;
+}
+.team-query select {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 44px 0 14px;
+  background: white;
+  color: inherit;
+  cursor: pointer;
+}
+.team-query > label::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  bottom: 19px;
+  width: 7px;
+  height: 7px;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.team-query > h2 {
+  margin: 0;
+  align-self: center;
+}
 table {
   border-collapse: collapse;
   width: 100%;
@@ -84,4 +124,69 @@ button:disabled {
 input,
 select {
   max-width: 100%;
+}
+
+.team-count, .team-role { color: #506760; font-size: .9rem; }
+.team-count { margin: .75rem 0 .3rem; }
+.team-roster { list-style: none; margin: 0; padding: 0; }
+.team-roster li { display: flex; align-items: center; gap: .8rem; padding: .85rem 0; border-top: 1px solid #dce5e0; overflow-wrap: anywhere; }
+.team-role { display: block; }
+.team-initials { flex: 0 0 2.75rem; height: 2.75rem; border-radius: 50%; display: grid; place-items: center; background: #e4efe9; color: #21543f; font-weight: 600; }
+
+.sheet-toolbar, .route-choices, .route-preview { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+.sheet-toolbar { align-items:flex-end; margin-bottom:1rem; }
+.sheet-toolbar label { margin:0; }
+.sheet-editor { animation:sheet-open .2s ease-out; }
+@keyframes sheet-open { from {opacity:0;transform:translateY(-4px)} to {opacity:1;transform:none} }
+@media(prefers-reduced-motion:reduce){.sheet-editor{animation:none}}
+.sheet-editor fieldset { min-width:0; margin-top:1rem; }
+.sheet-editor .add-line { display:block; width:100%; margin:.6rem 0; border:2px dashed #9db5aa; background:#f7faf8; color:#245950; }
+.add-line { font-size:1.4rem; }
+.sheet-editor button[value=publish] { margin-left:.6rem; }
+.route-editor { margin:.8rem 0; }
+.route-choices label,.route-preview button {display:inline-flex;align-items:center;gap:.4rem;border:1px solid #b4c7bd;border-radius:.35rem;padding:.4rem .65rem;margin:.4rem 0;color:#183c38;text-transform:capitalize}
+.route-preview {list-style:none;margin:0;padding:0}
+.route-preview button {background:#eff5f1;cursor:grab}
+.route-preview button::before {content:"⠿";color:#557268}
+.route-preview button:active {cursor:grabbing}
+.route-editor p {margin:.25rem 0}
+.item-search {display:inline-grid;vertical-align:top;position:relative;margin-right:1rem}
+.item-search label {margin-right:0}
+.item-search label>span {position:relative}
+.item-search input {padding-right:2.2rem;width:100%}
+.search-icon {position:absolute;right:12px;top:50%;width:13px;height:13px;border:2px solid #526b62;border-radius:50%;transform:translateY(-60%);font-size:0;pointer-events:none}
+.search-icon::after {content:"";width:7px;height:2px;background:#526b62;position:absolute;left:8px;top:9px;transform:rotate(45deg)}
+.search-results {position:absolute;z-index:2;top:4.3rem;background:white;border:1px solid #b4c7bd;padding:.4rem;min-width:100%;max-height:18rem;overflow:auto}
+.search-results button,.text-action {display:block;color:#245950;background:white;text-align:left}
+.search-results button {width:100%;border:0}
+.catalog-panel {margin-top:1rem}
+.catalog-panel form {display:flex;align-items:flex-end;flex-wrap:wrap;gap:.6rem}
+.catalog-panel form label {margin:0}
+
+.workspace-with-sidebar {
+  display: grid;
+  grid-template-columns: clamp(7rem, 17vw, 14rem) minmax(0, 1fr);
+  min-height: calc(100vh - 4.5rem);
+}
+.workspace-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  padding: 1.5rem clamp(.4rem, 1vw, 1rem);
+  gap: .4rem;
+  background: #e8efea;
+  border-right: 1px solid #cddbd2;
+}
+.workspace-sidebar button { text-align: left; background: transparent; color: #234a42; border-color: transparent; }
+.workspace-sidebar button[aria-current] { background: #245950; color: white; }
+.workspace-content { width: 100%; min-width: 0; margin-block: 0; }
+.team-error { border-left: 3px solid #a44d38; padding-left: 1rem; }
+.team-loading { color: #46685e; }
+@media (max-width: 600px) {
+  .workspace-with-sidebar { grid-template-columns: 6.5rem minmax(0,1fr); }
+  .workspace-content { padding: .75rem; }
+  .workspace-sidebar button { padding-inline: .3rem; }
+  .workspace-content fieldset { min-width: 0; }
 }

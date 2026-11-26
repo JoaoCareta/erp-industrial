@@ -1,8 +1,21 @@
-insert into sector values ('corte','Corte'),('pintura','Pintura');
-insert into account (id, issuer, subject, name, sector_id) values
-('00000000-0000-4000-8000-000000000001','${issuer}','00000000-0000-4000-8000-000000000001','Ana','corte'),
-('00000000-0000-4000-8000-000000000002','${issuer}','00000000-0000-4000-8000-000000000002','Administrador',null),
-('00000000-0000-4000-8000-000000000003','${issuer}','00000000-0000-4000-8000-000000000003','Bia','pintura');
-insert into entitlement values ('00000000-0000-4000-8000-000000000001','team.read','corte');
-insert into entitlement select '00000000-0000-4000-8000-000000000002'::uuid, action, '*' from
-unnest(array['account.suspend','engineering.read','engineering.edit','engineering.publish','team.read']) as action;
+insert into business_group values ('mundo-eduk','Mundo Eduk'),('grupo-demo','Grupo de demonstração');
+insert into plant values ('eduk','mundo-eduk','Fábrica do Mundo Eduk'),('birigui','grupo-demo','Birigui'),('aracatuba','grupo-demo','Araçatuba');
+insert into sector values ('eduk','corte','Corte'),('eduk','pintura','Pintura'),('birigui','corte','Corte'),('aracatuba','corte','Corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000001','mundo-eduk','${issuer}','00000000-0000-4000-8000-000000000001','Ana');
+insert into team_member values ('mundo-eduk','eduk','corte','00000000-0000-4000-8000-000000000001');
+insert into assignment values ('mundo-eduk','00000000-0000-4000-8000-000000000001','leader','eduk','corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000002','mundo-eduk','${issuer}','00000000-0000-4000-8000-000000000002','Administrador');
+insert into assignment values ('mundo-eduk','00000000-0000-4000-8000-000000000002','admin',null,null);
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000003','mundo-eduk','${issuer}','00000000-0000-4000-8000-000000000003','Bia');
+insert into team_member values ('mundo-eduk','eduk','pintura','00000000-0000-4000-8000-000000000003');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000004','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000004','Líder Birigui');
+insert into team_member values ('grupo-demo','birigui','corte','00000000-0000-4000-8000-000000000004');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000004','leader','birigui','corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000005','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000005','Líder Araçatuba');
+insert into team_member values ('grupo-demo','aracatuba','corte','00000000-0000-4000-8000-000000000005');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000005','leader','aracatuba','corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000006','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000006','Gerência regional');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000006','regional','birigui',null);
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000006','regional','aracatuba',null);
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000007','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000007','Gerência de Birigui');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000007','manager','birigui',null);

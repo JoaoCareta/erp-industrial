@@ -22,10 +22,10 @@ import java.util.UUID
 @Transactional
 class EngineeringTest @Autowired constructor(val mvc: MockMvc, val json: ObjectMapper, val catalog: Catalog, val sheets: Sheets) {
     val actor = jwt().jwt { it.subject("00000000-0000-4000-8000-000000000002").issuer(System.getenv("OIDC_ISSUER")) }
-    fun post(path: String, body: Any): String = mvc.post("/api/$path") {
+    fun post(path: String, body: Any): String = mvc.post("/api/units/eduk/$path") {
         with(actor); contentType = MediaType.APPLICATION_JSON; content = json.writeValueAsString(body)
     }.andExpect { status { isOk() } }.andReturn().response.contentAsString
-    fun put(path: String, body: Any) = mvc.put("/api/$path") {
+    fun put(path: String, body: Any) = mvc.put("/api/units/eduk/$path") {
         with(actor); contentType = MediaType.APPLICATION_JSON; content = json.writeValueAsString(body)
     }.andExpect { status { isOk() } }
     fun item(kind: Kind, value: ItemInput = ItemInput(kind.name,kind.name)): Item =
@@ -43,18 +43,18 @@ class EngineeringTest @Autowired constructor(val mvc: MockMvc, val json: ObjectM
         val d1: Draft = json.readValue(post("$path/drafts",first))
         assertEquals("1",post("$path/drafts/${d1.id}/publication",Revision(1)))
         assertEquals("1",post("$path/drafts/${d1.id}/publication",Revision(1)))
-        assertThrows<ResponseStatusException> { sheets.edit(product.id,d1.id,Edit(1,second)) }
+        assertThrows<ResponseStatusException> { sheets.edit("mundo-eduk",product.id,d1.id,Edit(1,second)) }
         val d2: Draft = json.readValue(post("$path/drafts",first))
-        assertThrows<ResponseStatusException> { sheets.edit(product.id,d2.id,Edit(9,second)) }
+        assertThrows<ResponseStatusException> { sheets.edit("mundo-eduk",product.id,d2.id,Edit(9,second)) }
         put("$path/drafts/${d2.id}",Edit(1,second))
-        assertThrows<ResponseStatusException> { sheets.publish(product.id,d2.id,1,"admin") }
+        assertThrows<ResponseStatusException> { sheets.publish("mundo-eduk",product.id,d2.id,1,"admin") }
         assertEquals("2",post("$path/drafts/${d2.id}/publication",Revision(2)))
         put("catalog/part/${part.id}",part.value.copy(name="renomeada"))
         put("catalog/material/${material.id}",material.value.copy(active=false))
-        mvc.get("/api/catalog/part") { with(actor) }.andExpect { jsonPath("$[0].value.name") { value("renomeada") } }
-        mvc.get("/api/$path/versions") { with(actor) }.andExpect { content { json("[1,2]") } }
+        mvc.get("/api/units/eduk/catalog/part") { with(actor) }.andExpect { jsonPath("$[0].value.name") { value("renomeada") } }
+        mvc.get("/api/units/eduk/$path/versions") { with(actor) }.andExpect { content { json("[1,2]") } }
         for ((version, expected) in listOf(first,second).withIndex()) {
-            val result=mvc.get("/api/$path/versions/${version+1}") { with(actor) }.andExpect {
+            val result=mvc.get("/api/units/eduk/$path/versions/${version+1}") { with(actor) }.andExpect {
                 status { isOk() }; jsonPath("$.parts[0].value.name") { value("part") }
             }.andReturn().response.contentAsString
             val actual=json.treeToValue(json.readTree(result)["sheet"],Sheet::class.java)
@@ -71,29 +71,28 @@ class EngineeringTest @Autowired constructor(val mvc: MockMvc, val json: ObjectM
         for (bad in listOf(sheet.copy(pieces=emptyList()),sheet.copy(pieces=listOf(line,line)),
             sheet.copy(pieces=listOf(line.copy(quantity=0))),sheet.copy(pieces=listOf(line.copy(steps=emptyList()))),
             sheet.copy(pieces=listOf(line.copy(steps=listOf("")))),sheet.copy(pieces=listOf(line.copy(minutesPerCut=(-1).toBigDecimal())))))
-            assertThrows<IllegalArgumentException> { sheets.create(product.id,bad) }
+            assertThrows<IllegalArgumentException> { sheets.create("mundo-eduk",product.id,bad) }
         for (bad in listOf(ItemInput("","n"),ItemInput("c",""),ItemInput("c","n",unitId=id),ItemInput("c","n",categoryId=id)))
-            assertThrows<IllegalArgumentException> { catalog.save(Kind.part,bad,null) }
-        assertThrows<IllegalArgumentException> { catalog.save(Kind.unit, ItemInput("u","u"),null) }
-        assertThrows<IllegalArgumentException> { catalog.save(Kind.material, ItemInput("m","m"),null) }
+            assertThrows<IllegalArgumentException> { catalog.save("mundo-eduk",Kind.part,bad,null) }
+        assertThrows<IllegalArgumentException> { catalog.save("mundo-eduk",Kind.unit, ItemInput("u","u"),null) }
+        assertThrows<IllegalArgumentException> { catalog.save("mundo-eduk",Kind.material, ItemInput("m","m"),null) }
         val cat=item(Kind.category)
-        assertThrows<IllegalArgumentException> { catalog.save(Kind.material,ItemInput("m","m",categoryId=cat.id),null) }
+        assertThrows<IllegalArgumentException> { catalog.save("mundo-eduk",Kind.material,ItemInput("m","m",categoryId=cat.id),null) }
         val unit=item(Kind.unit,ItemInput("kg","Quilo","massa"))
         val m=item(Kind.material,ItemInput("m","m",unitId=unit.id,categoryId=cat.id))
         for (bad in listOf(MaterialLine(m.id,id,1.toBigDecimal()),MaterialLine(m.id,unit.id,0.toBigDecimal())))
-            assertThrows<IllegalArgumentException> { sheets.create(product.id,sheet.copy(materials=listOf(bad))) }
-        catalog.save(Kind.part,part.value.copy(active=false),part.id)
-        assertThrows<IllegalArgumentException> { sheets.create(product.id,sheet) }
-        assertThrows<ResponseStatusException> { catalog.get(id,Kind.product) }
-        assertThrows<ResponseStatusException> { sheets.version(product.id,1) }
-        assertThrows<ResponseStatusException> { sheets.edit(product.id,id,Edit(1,sheet)) }
+            assertThrows<IllegalArgumentException> { sheets.create("mundo-eduk",product.id,sheet.copy(materials=listOf(bad))) }
+        catalog.save("mundo-eduk",Kind.part,part.value.copy(active=false),part.id)
+        assertThrows<IllegalArgumentException> { sheets.create("mundo-eduk",product.id,sheet) }
+        assertThrows<ResponseStatusException> { catalog.get("mundo-eduk",id,Kind.product) }
+        assertThrows<ResponseStatusException> { sheets.version("mundo-eduk",product.id,1) }
+        assertThrows<ResponseStatusException> { sheets.edit("mundo-eduk",product.id,id,Edit(1,sheet)) }
     }
     @Test fun httpErrorsAndReadiness() {
         mvc.get("/api/ready").andExpect { status { isOk() } }
-        mvc.get("/api/sectors/corte/team").andExpect { status { isUnauthorized() } }
-        mvc.post("/api/accounts/${UUID.randomUUID()}/suspension") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"reason":" " }""" }.andExpect { status { isBadRequest() } }
-        mvc.post("/api/accounts/${UUID.randomUUID()}/suspension") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"reason":"teste"}""" }.andExpect { status { isNotFound() } }
+        mvc.get("/api/units/eduk/sectors/corte/team").andExpect { status { isUnauthorized() } }
+        mvc.post("/api/units/eduk/catalog/part") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"code":"","name":"teste"}""" }.andExpect { status { isBadRequest() } }
         item(Kind.part)
-        mvc.post("/api/catalog/part") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"code":"part","name":"outra"}""" }.andExpect { status { isConflict() } }
+        mvc.post("/api/units/eduk/catalog/part") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"code":"part","name":"outra"}""" }.andExpect { status { isConflict() } }
     }
 }

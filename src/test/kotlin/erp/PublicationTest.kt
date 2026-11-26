@@ -19,25 +19,25 @@ import org.springframework.jdbc.core.JdbcTemplate
 class PublicationTest @Autowired constructor(val catalog: Catalog, val sheets: Sheets, val db: JdbcTemplate) {
     @Test fun concurrentRetryAndImmutableHistory() {
         val code = "zz-" + UUID.randomUUID()
-        val product = catalog.save(Kind.product,ItemInput(code,"Kit"),null)
-        val part = catalog.save(Kind.part,ItemInput(code,"Peça"),null)
+        val product = catalog.save("mundo-eduk",Kind.product,ItemInput(code,"Kit"),null)
+        val part = catalog.save("mundo-eduk",Kind.part,ItemInput(code,"Peça"),null)
         val sheet = Sheet(listOf(PieceLine(part.id,2,listOf("corte"))),emptyList())
-        val draft = sheets.create(product.id,sheet)
+        val draft = sheets.create("mundo-eduk",product.id,sheet)
         val pool = Executors.newFixedThreadPool(2)
         val barrier = CyclicBarrier(2)
         try {
             val calls = List(2) { pool.submit(Callable {
                 barrier.await(10,TimeUnit.SECONDS)
-                sheets.publish(product.id,draft.id,1,"teste")
+                sheets.publish("mundo-eduk",product.id,draft.id,1,"teste")
             }) }
             assertEquals(listOf(1,1), calls.map { it.get(20,TimeUnit.SECONDS) })
         } finally { pool.shutdownNow() }
         assertThrows<DataAccessException> { db.update("update publication set actor='outro' where draft_id=?",draft.id) }
         assertThrows<DataAccessException> { db.update("delete from publication where draft_id=?",draft.id) }
-        assertEquals(listOf(1),sheets.versions(product.id))
-        val invalidated = sheets.create(product.id,sheet)
-        catalog.save(Kind.part,part.value.copy(active=false),part.id)
-        assertThrows<IllegalArgumentException> { sheets.publish(product.id,invalidated.id,1,"teste") }
-        assertEquals(listOf(1),sheets.versions(product.id))
+        assertEquals(listOf(1),sheets.versions("mundo-eduk",product.id))
+        val invalidated = sheets.create("mundo-eduk",product.id,sheet)
+        catalog.save("mundo-eduk",Kind.part,part.value.copy(active=false),part.id)
+        assertThrows<IllegalArgumentException> { sheets.publish("mundo-eduk",product.id,invalidated.id,1,"teste") }
+        assertEquals(listOf(1),sheets.versions("mundo-eduk",product.id))
     }
 }

@@ -12,14 +12,13 @@ test("publica V1 e V2 e preserva a composição e o roteiro", async ({
     [
       "Tipo",
       "Produto pai",
-      "Peça do kit",
-      "Matéria-prima do produto",
       "Categoria de referência",
       "Unidade de referência",
     ].includes(label)
       ? page.getByRole("combobox", { name: label, exact: true })
       : page.getByLabel(label, { exact: true });
   await click("Engenharia");
+  await click("Novo");
   for (const [kind, code, name] of [
     ["category", "MAD", "Madeira"],
     ["unit", "PL", "Placa"],
@@ -37,7 +36,7 @@ test("publica V1 e V2 e preserva a composição e o roteiro", async ({
       await field("Unidade de referência").selectOption({ label: "Placa" });
     }
     await click("Salvar cadastro");
-    await expect(
+    if(kind !== "product") await expect(
       page.getByRole("button", { name: code + " · " + name }),
     ).toBeVisible();
   }
@@ -46,24 +45,30 @@ test("publica V1 e V2 e preserva a composição e o roteiro", async ({
     ["Roda", "2", "corte,pintura"],
     ["Base", "1", "montagem"],
   ]) {
-    await click("Adicionar peça");
-    await field("Peça do kit").last().selectOption({ label: name });
+    if (name !== "Roda") await click("Adicionar item");
+    await field("Peça do kit").last().fill(name);
+    await click(name === "Roda" ? "RO · Roda" : "BA · Base");
     await field("Quantidade por kit").last().fill(qty);
-    await field("Etapas em ordem (separadas por vírgula)").last().fill(steps);
+    for (const step of steps.split(",")) await page.getByRole("checkbox", {name: new RegExp("^"+step+"$","i")}).last().check();
   }
-  await click("Adicionar material");
-  await field("Matéria-prima do produto").selectOption({ label: "Painel" });
+  await click("Adicionar item");
+  await page.getByLabel("Tipo de item").last().selectOption("material");
+  await field("Matéria-prima do produto").fill("MDF");
+  await click("MDF · Painel");
   await field("Quantidade por produto").fill("0.5");
   await click("Publicar ficha");
   await click("Consultar V1");
   await expect(
     page.getByText("Roda · 2 por kit · corte → pintura"),
   ).toBeVisible();
-  await click("Copiar para rascunho");
+  await click("Editar composição");
   await field("Quantidade por kit").first().fill("4");
-  await field("Etapas em ordem (separadas por vírgula)")
-    .first()
-    .fill("corte,lixamento,pintura");
+  await page.getByRole("checkbox", {name:/^lixamento$/i}).first().check();
+  const route = page.getByRole("list",{name:"Prévia do roteiro"}).first();
+  const chip = (name:string) => route.getByRole("button",{name,exact:true});
+  await chip("pintura").dragTo(chip("lixamento"));
+  await expect(route.getByRole("button")).toHaveText(["corte","pintura","lixamento"]);
+  await chip("lixamento").dragTo(chip("pintura"));
   await field("Quantidade por produto").fill("0.75");
   await click("Publicar ficha");
   await click("Consultar V2");

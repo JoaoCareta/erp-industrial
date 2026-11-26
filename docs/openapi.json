@@ -52,10 +52,18 @@
         "security": []
       }
     },
-    "/api/sectors/{sector}/team": {
+    "/api/units/{plant}/sectors/{sector}/team": {
       "get": {
         "summary": "Consultar equipe ativa de um setor",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "sector",
@@ -81,11 +89,17 @@
                       },
                       "name": {
                         "type": "string"
+                      },
+                      "role": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Funções atribuídas neste setor."
                       }
                     },
                     "required": [
                       "id",
-                      "name"
+                      "name",
+                      "role"
                     ]
                   }
                 }
@@ -110,64 +124,18 @@
         }
       }
     },
-    "/api/accounts/{id}/suspension": {
-      "post": {
-        "summary": "Suspender conta na próxima operação",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Operação concluída"
-          },
-          "400": {
-            "description": "Dados inválidos"
-          },
-          "401": {
-            "description": "Credencial inválida"
-          },
-          "403": {
-            "description": "Sem acesso efetivo"
-          },
-          "404": {
-            "description": "Registro ausente"
-          },
-          "409": {
-            "description": "Conflito de código ou revisão"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "reason": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "reason"
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/catalog/{kind}": {
+    "/api/units/{plant}/catalog/{kind}": {
       "get": {
         "summary": "Listar cadastros por tipo",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "kind",
@@ -212,6 +180,14 @@
         "summary": "Criar cadastro",
         "parameters": [
           {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "in": "path",
             "name": "kind",
             "required": true,
@@ -259,10 +235,18 @@
         }
       }
     },
-    "/api/catalog/{kind}/{id}": {
+    "/api/units/{plant}/catalog/{kind}/{id}": {
       "put": {
         "summary": "Atualizar cadastro",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "kind",
@@ -320,10 +304,18 @@
         }
       }
     },
-    "/api/products/{product}/drafts": {
+    "/api/units/{plant}/products/{product}/drafts": {
       "post": {
         "summary": "Criar rascunho",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "product",
@@ -373,10 +365,18 @@
         }
       }
     },
-    "/api/products/{product}/drafts/{id}": {
+    "/api/units/{plant}/products/{product}/drafts/{id}": {
       "put": {
         "summary": "Atualizar revisão do rascunho",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "product",
@@ -447,10 +447,18 @@
         }
       }
     },
-    "/api/products/{product}/drafts/{id}/publication": {
+    "/api/units/{plant}/products/{product}/drafts/{id}/publication": {
       "post": {
         "summary": "Publicar revisão de forma idempotente",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "product",
@@ -517,10 +525,18 @@
         }
       }
     },
-    "/api/products/{product}/versions": {
+    "/api/units/{plant}/products/{product}/versions": {
       "get": {
         "summary": "Listar versões do produto",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "product",
@@ -563,10 +579,18 @@
         }
       }
     },
-    "/api/products/{product}/versions/{version}": {
+    "/api/units/{plant}/products/{product}/versions/{version}": {
       "get": {
         "summary": "Consultar composição e roteiro históricos",
         "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "in": "path",
             "name": "product",
@@ -610,6 +634,84 @@
           },
           "409": {
             "description": "Conflito de código ou revisão"
+          }
+        }
+      }
+    },
+    "/api/me/context": {
+      "get": {
+        "summary": "Contexto autorizado da pessoa autenticada",
+        "responses": {
+          "200": {
+            "description": "Grupo, unidades, ações e setores liberados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "accountId",
+                    "units"
+                  ],
+                  "properties": {
+                    "accountId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "units": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "name",
+                          "groupName",
+                          "actions",
+                          "sectors"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "groupName": {
+                            "type": "string"
+                          },
+                          "actions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "sectors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "id",
+                                "name"
+                              ],
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Conta sem acesso"
           }
         }
       }

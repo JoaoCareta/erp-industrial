@@ -5,7 +5,6 @@ test("histórico após reiniciar a API", async ({ page }) => {
   await page.locator("#password").fill("demo-industrial");
   await page.locator("#kc-login").click();
   await page.getByRole("button", { name: "Engenharia" }).click();
-  await page.getByRole("button", { name: "Carregar cadastros" }).click();
   await page
     .getByRole("combobox", { name: "Produto pai" })
     .selectOption({ label: "Kit" });

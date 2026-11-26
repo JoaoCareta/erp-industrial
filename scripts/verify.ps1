@@ -2,6 +2,7 @@ param([string]$Base)
 . "$PSScriptRoot/common.ps1"
 $project = 'erp-check-' + [guid]::NewGuid().ToString('N')
 $env:COMPOSE_FILE = 'compose.yaml' + [IO.Path]::PathSeparator + 'infra/compose.verify.yaml'
+$env:ERP_VERIFY_PROJECT = $project
 $env:DB_PORT = '55433'
 $env:WEB_PORT = '18081'
 $env:WEB_ORIGIN = 'http://localhost:18081'

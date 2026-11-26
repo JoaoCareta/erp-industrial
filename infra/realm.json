@@ -79,6 +79,70 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000004",
+      "username": "lider-birigui",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "lider-birigui@example.invalid",
+      "firstName": "Líder Birigui",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000005",
+      "username": "lider-aracatuba",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "lider-aracatuba@example.invalid",
+      "firstName": "Líder Araçatuba",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000006",
+      "username": "regional",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "regional@example.invalid",
+      "firstName": "Gerência regional",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000007",
+      "username": "gerente-birigui",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "gerente-birigui@example.invalid",
+      "firstName": "Gerência de Birigui",
+      "lastName": "Demonstração",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo-industrial",
+          "temporary": false
+        }
+      ]
     }
   ]
 }

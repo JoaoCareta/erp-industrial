@@ -5,12 +5,13 @@ import json
 
 suites = {
     "integracao": ("build/test-results/test/TEST-*.xml", [
-        "sectorAndSuspension()", "preservesPublishedVersions()", "rejectsInvalidCatalogsAndDrafts()",
+        "scopedRoles()", "sectorAndSuspension()", "preservesPublishedVersions()", "rejectsInvalidCatalogsAndDrafts()",
         "concurrentRetryAndImmutableHistory()", "httpErrorsAndReadiness()", "moduleBoundaries()"]),
     "contrato": ("build/test-results/test/TEST-*.xml", ["openApiMatchesHandlers()"]),
-    "interface": ("reports/ui.xml", ["UI-A1 consulta, negativa, lista vazia, suspensão e saída",
+    "interface": ("reports/ui.xml", ["UI-A1 carregamento, equipe, lista vazia, erro e saída",
+        "seleção de unidade, setores e revogação", "entrada indisponível e conta suspensa",
         "UI-E2 cadastros, rascunho e histórico consultável", "inicialização OIDC, renovação e saída", "login indisponível"]),
-    "e2e": ("reports/*.xml", ["setor e suspensão com o mesmo token", "funcionário sem concessão",
+    "e2e": ("reports/*.xml", ["setor e suspensão com o mesmo token", "funcionário sem concessão","regional escolhe e retoma a unidade",
         "publica V1 e V2 e preserva a composição e o roteiro", "histórico após reiniciar a API"]),
 }
 report = {}
