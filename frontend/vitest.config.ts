@@ -4,10 +4,10 @@ export default defineConfig({
     reporters: ["default", "junit"],
     outputFile: { junit: "../reports/ui.xml" },
     environment: "jsdom",
-    include: ["tests/**/*.test.tsx"],
+    include: ["tests/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: ["src/**/*.tsx"],
+      include: ["src/**/*.{ts,tsx}"],
       reporter: ["lcov", "text", "json-summary"],
     },
   },

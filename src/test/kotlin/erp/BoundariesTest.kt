@@ -3,8 +3,10 @@ package erp
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
+@Tag("architecture")
 class BoundariesTest {
     @Test fun moduleBoundaries() {
         val classes = ClassFileImporter().importPackages("erp.access","erp.engineering")

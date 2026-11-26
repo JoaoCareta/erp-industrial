@@ -5,6 +5,15 @@ from coverage import MODULES, evaluate
 
 
 class CoverageGateTest(unittest.TestCase):
+    def test_new_lines_threshold_is_inclusive_even_for_small_changes(self):
+        data = {root+"Example": {1: [1,1,0,0]} for root in MODULES.values()}
+        path = MODULES["frontend/engenharia"]+"Example"
+        data[path] = {n: [int(n != 10),1,0,0] for n in range(1, 101)}
+        selected = defaultdict(set, {path: set(range(1, 11))})
+        self.assertEqual(evaluate(data, selected)[1], [])
+        data[path][9][0] = 0
+        self.assertEqual(evaluate(data, selected)[1], ["frontend/engenharia/alterado linhas: 8/10"])
+
     def test_single_module_and_diff(self):
         data = {p+"Example": {1: [100,100,100,100], 2: [1,1,1,1]} for p in MODULES.values()}
         target = MODULES["backend/acesso"]+"Example"

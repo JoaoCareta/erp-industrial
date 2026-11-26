@@ -19,6 +19,14 @@ Pré-requisitos: Git, JDK 25 com `JAVA_HOME` configurado, Node 24 com npm, Pytho
 
 Abra [o ERP local](http://localhost:18080). Os serviços de desenvolvimento usam as portas de loopback 18080 e 55432. A verificação usa 18081 e 55433, cria banco e realm novos e remove apenas os volumes do projeto efêmero ao terminar. Execute uma verificação por vez nessa máquina. Para comparar um PR, use `./scripts/verify.ps1 -Base <SHA>`. Os resultados ficam em `reports/`, `build/reports/` e `frontend/coverage/`. O GitHub Actions usa os mesmos scripts. O comando de parada preserva os dados de desenvolvimento.
 
+## Checks de merge na master
+
+Cada PR executa os testes de front-end (Vitest) e back-end (JUnit) em jobs independentes. No Kotlin, marque os testes unitários com `@Tag("unit")` e os de arquitetura com `@Tag("architecture")`. Os demais rodam na integração com PostgreSQL. Para rodar somente os unitários, use `./gradlew test -PtestSuite=unit` e `npm test` na pasta `frontend`.
+
+O check `Coverage >= 90%` compara as linhas executáveis alteradas no Kotlin e no TypeScript com o SHA da base do PR. Ele combina as três execuções do JaCoCo e lê o LCOV do Vitest. Cada módulo precisa atingir 90% de linhas e de branches, no total e no diff. Uma linha nova sem cobertura reprova o módulo se for a única linha executável alterada nele.
+
+A proteção da `master` exige os dois checks unitários, a cobertura, a verificação final e a análise automática do [projeto no SonarQube Cloud](https://sonarcloud.io/project/overview?id=JoaoCareta_erp-industrial). O relatório numérico de cobertura fica no artefato `coverage` do GitHub Actions.
+
 ## Grupos, unidades e cargos
 
 Cada conta pertence a um grupo. Após o login, o ERP abre a única fábrica liberada ou solicita a escolha entre as unidades autorizadas. A última seleção é lembrada por conta neste navegador e validada novamente na entrada. O cabeçalho identifica grupo e unidade. Na tela Equipe, um único setor carrega automaticamente. Quando há vários, a pessoa escolhe o setor.
