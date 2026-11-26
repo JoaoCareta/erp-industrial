@@ -54,6 +54,9 @@ jobs:
       - &java
         uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '25', cache: gradle}
+      - &maven-mirror
+        name: Configure Maven Central mirror for Gradle builds
+        run: install -Dm644 .github/gradle/central.gradle ~/.gradle/init.d/central.gradle
       - run: ./gradlew test -PtestSuite=unit
       - run: python scripts/check_test_results.py build/test-results/test/TEST-*.xml
       - uses: actions/upload-artifact@v4
@@ -71,6 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - *java
+      - *maven-mirror
       - run: ./gradlew distTar test -PtestSuite=architecture
       - uses: actions/upload-artifact@v4
         with: {name: api, path: build/distributions/*.tar, if-no-files-found: error}
@@ -94,6 +98,7 @@ jobs:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
       - *java
+      - *maven-mirror
       - uses: actions/download-artifact@v4
         with: {name: unit-evidence, path: incoming/unit}
       - uses: actions/download-artifact@v4
@@ -184,6 +189,7 @@ jobs:
           test -s frontend/coverage/lcov.info
           sed -i 's|^SF:src/|SF:frontend/src/|' frontend/coverage/lcov.info
           grep -q '^SF:frontend/src/' frontend/coverage/lcov.info
+      - *maven-mirror
       - uses: SonarSource/sonarqube-auth-action@a0aa643acde4162396015b4f12536c1b9c4aab82
         with: {project-key: JoaoCareta_erp-industrial}
       - uses: SonarSource/sonarqube-scan-action@70bad232163b09d998ea0707ee80c0ec80798c16

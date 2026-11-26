@@ -1,0 +1,11 @@
+// Apply to the current checkout and both archived PostgreSQL builds used by CI.
+def centralMirror = 'https://maven-central.storage-download.googleapis.com/maven2'
+beforeSettings { settings ->
+    settings.pluginManagement.repositories {
+        maven { url = centralMirror }
+        gradlePluginPortal()
+    }
+}
+beforeProject { project ->
+    project.repositories.maven { url = centralMirror }
+}
