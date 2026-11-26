@@ -62,6 +62,43 @@ class EngineeringTest @Autowired constructor(val mvc: MockMvc, val json: ObjectM
             assertEquals(0,expected.materials.single().quantity.compareTo(actual.materials.single().quantity))
         }
     }
+    @Test fun stockReadsRequestedVersion() {
+        val category = item(Kind.category)
+        val unit = item(Kind.unit, ItemInput("PL","Placa","contagem"))
+        val material = item(Kind.material, ItemInput("MAD","Madeira",categoryId=category.id,unitId=unit.id))
+        val part = item(Kind.part)
+        val product = item(Kind.product)
+        val path = "products/${product.id}"
+        val quantities = listOf("0.50","0.75")
+        for (quantity in quantities) {
+            val draft: Draft = json.readValue(post("$path/drafts",Sheet(
+                listOf(PieceLine(part.id,2,listOf("corte"))),
+                listOf(MaterialLine(material.id,unit.id,quantity.toBigDecimal())))))
+            post("$path/drafts/${draft.id}/publication",Revision(1))
+        }
+        put("catalog/material/${material.id}",material.value.copy(name="Novo nome", active=false))
+        put("catalog/unit/${unit.id}",unit.value.copy(name="Outra descrição"))
+        for ((index, quantity) in quantities.withIndex()) {
+            val version = index + 1
+            val response = mvc.get("/api/units/eduk/$path/versions/$version") { with(actor) }
+                .andExpect { status { isOk() } }.andReturn().response.contentAsString
+            val snapshot = json.readTree(response)
+            val line = snapshot["sheet"]["materials"].single()
+            val copy = snapshot["materials"].single()
+            assertEquals(version,snapshot["version"].intValue())
+            assertEquals(material.id.toString(),line["materialId"].stringValue())
+            assertEquals(unit.id.toString(),line["unitId"].stringValue())
+            assertEquals(0,quantity.toBigDecimal().compareTo(line["quantity"].decimalValue()))
+            assertEquals(line["materialId"],copy["material"]["id"])
+            assertEquals(line["unitId"],copy["unit"]["id"])
+            assertEquals("Madeira",copy["material"]["value"]["name"].stringValue())
+            assertEquals("Placa",copy["unit"]["value"]["name"].stringValue())
+        }
+        mvc.get("/api/units/eduk/$path/versions/3") { with(actor) }.andExpect { status { isNotFound() } }
+        mvc.get("/api/units/birigui/$path/versions/1") { with(actor) }.andExpect { status { isForbidden() } }
+        val regional = jwt().jwt { it.subject("00000000-0000-4000-8000-000000000006").issuer(System.getenv("OIDC_ISSUER")) }
+        mvc.get("/api/units/birigui/$path/versions/1") { with(regional) }.andExpect { status { isNotFound() } }
+    }
     @Test fun rejectsInvalidCatalogsAndDrafts() {
         val product=item(Kind.product)
         val part=item(Kind.part)

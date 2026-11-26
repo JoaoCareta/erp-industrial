@@ -82,3 +82,30 @@ test("regional escolhe e retoma a unidade", async ({ page }) => {
     page.getByText("Líder Araçatuba", { exact: true }),
   ).toBeVisible();
 });
+
+test("troca de operador no mesmo posto", async ({ page }) => {
+  await login(page, "regional");
+  await page.getByLabel("Trocar unidade").selectOption("aracatuba");
+  const previousMember = page.getByText("Líder Araçatuba", { exact: true });
+  await expect(previousMember).toBeVisible();
+  await page.getByRole("button", { name: "Sair" }).click();
+  await expect(page.locator("#username")).toBeVisible();
+  const contextRequest = page.waitForRequest(r => r.url().endsWith("/api/me/context"));
+  await page.locator("#username").fill("operador");
+  await page.locator("#password").fill("demo-industrial");
+  await page.locator("#kc-login").click();
+  const operator = await (await contextRequest).allHeaders();
+  const blocked = page.getByRole("heading", { name: "Nenhuma unidade liberada" });
+  await expect(blocked).toBeVisible();
+  await page.goBack();
+  await expect(previousMember).toHaveCount(0);
+  await page.goto("/");
+  await page.reload();
+  await expect(blocked).toBeVisible();
+  await expect(previousMember).toHaveCount(0);
+  const response = await page.request.get("/api/units/aracatuba/sectors/corte/team", {
+    headers: { authorization: operator.authorization },
+  });
+  expect(response.status()).toBe(403);
+  expect(await response.text()).not.toContain("Líder Araçatuba");
+});

@@ -79,4 +79,19 @@ test("publica V1 e V2 e preserva a composição e o roteiro", async ({
   await click("Consultar V1");
   await expect(page.getByText("Painel · 0.5 PL")).toBeVisible();
   await expect(page.getByText("Base · 1 por kit · montagem")).toBeVisible();
+  await page.getByText("Prévia de materiais", { exact: true }).click();
+  const csv = { name: "materiais.csv", mimeType: "text/csv",
+    buffer: Buffer.from("código,descrição,unidade\nMDF,Painel,PL\nNOVA,Nova,PL") };
+  const writes: string[] = [];
+  page.on("request", req => {
+    if (req.url().includes("/api/") && req.method() !== "GET") writes.push(req.method());
+  });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const reads = page.waitForResponse(res => res.url().endsWith("/catalog/material") && res.ok());
+    await page.getByLabel(/Arquivo CSV/).setInputFiles(csv);
+    await reads;
+    await expect(page.getByRole("row", { name: "2 MDF Painel PL Confere" })).toBeVisible();
+    await expect(page.getByRole("row", { name: "3 NOVA Nova PL Material novo" })).toBeVisible();
+  }
+  expect(writes).toEqual([]);
 });

@@ -1,3 +1,4 @@
+import { MaterialPreview } from "./MaterialPreview";
 import React, { useEffect, useRef, useState } from "react";
 import type { RequestApi, Run } from "../Workspace";
 type Props = {
@@ -159,7 +160,7 @@ export function Engineering({ api, run, canEdit, canPublish }: Props) {
                 }
               />
             </label>
-            <button>Salvar cadastro</button>
+            <button type="submit">Salvar cadastro</button>
             <button type="button" onClick={reset}>
               Limpar campos
             </button>
@@ -192,13 +193,14 @@ export function Engineering({ api, run, canEdit, canPublish }: Props) {
       </ul>
     </section>
   );
-  return <Sheets key={createdProduct} initialProduct={createdProduct} catalog={catalog} onCatalog={k => {setKind(k);reset();filter("");openCatalog(true)}}
+  return <><MaterialPreview run={run} catalogs={() => Promise.all([api<Item[]>("catalog/material"), api<Item[]>("catalog/unit")])} />
+      <Sheets key={createdProduct} initialProduct={createdProduct} catalog={catalog} onCatalog={k => {setKind(k);reset();filter("");openCatalog(true)}}
         canEdit={canEdit}
         canPublish={canPublish}
         all={all}
         api={api}
         run={run}
-      />;
+      /></>;
 }
 type Piece = {
   partId: string;
@@ -483,8 +485,8 @@ function Sheets({
               >
                 +
               </button>
-              <button value="save">Salvar rascunho</button>
-              {canPublish && <button value="publish">Publicar ficha</button>}
+              <button type="submit" value="save">Salvar rascunho</button>
+              {canPublish && <button type="submit" value="publish">Publicar ficha</button>}
             </form>
           )}
         </>
@@ -532,7 +534,13 @@ function RouteEditor({steps,update}:{steps:string[];update:(steps:string[])=>voi
     <strong>Prévia do roteiro</strong><p>Arraste as etapas para alterar a ordem.</p>
     <ul className="route-preview" aria-label="Prévia do roteiro">{steps.map((step,i)=><li key={step}>
       <button type="button" aria-label={step} draggable onDragStart={event=>{dragged.current=i;event.dataTransfer.setData("text/plain",step)}}
-        onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(dragged.current!==null)move(dragged.current,i);dragged.current=null}}
+        onDragOver={event=>event.preventDefault()} onDrop={event => {
+          event.preventDefault();
+          if (dragged.current !== null) {
+            move(dragged.current, i);
+          }
+          dragged.current = null;
+        }}
         onDragEnd={()=>{dragged.current=null}}
         onKeyDown={event=>{if(["ArrowLeft","ArrowRight"].includes(event.key)){event.preventDefault();move(i,i+(event.key==="ArrowLeft"?-1:1))}}}
         title="Arraste ou use as setas do teclado">{step}</button></li>)}</ul>

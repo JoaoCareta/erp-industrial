@@ -4,4 +4,8 @@ services:
     tmpfs:
       - /var/lib/postgresql/data
     environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?verification database password required}
       POSTGRES_INITDB_ARGS: --no-sync
+  api:
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD:?verification database password required}

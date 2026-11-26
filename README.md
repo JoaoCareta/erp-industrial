@@ -51,3 +51,13 @@ As contas locais usam a senha de demonstração `demo-industrial`. A configuraç
 Com a conta de administração, abra Engenharia e escolha um produto para consultar sua última ficha publicada. Use **Novo** para cadastrar um produto. Na composição, busque peças e matérias-primas por código ou nome. Use **+** para adicionar uma linha e selecione o tipo de item. Marque as etapas de cada peça e arraste os retângulos na prévia para ordenar o roteiro. Com o teclado, use as setas esquerda e direita sobre uma etapa. Publique e consulte V1. Use **Editar composição**, altere quantidades ou etapas, publique e consulte V2. As duas publicações incluem as descrições e unidades vigentes quando cada uma foi gravada. A matéria-prima usa a unidade de referência do cadastro; conversões industriais dependem da homologação.
 
 O [índice de documentação](docs/README.md) reúne contratos, decisões, plano de implementação e catálogo de versões.
+
+## Atualizar a demonstração anterior às unidades
+
+Para um banco criado pela revisão `2f8fd85`, selecione a sequência Flyway que conserva os checksums originais. No Compose, defina `ERP_FLYWAY_LOCATIONS=classpath:db/legacy,classpath:db/legacy-demo` para a base sintética. Quando o catálogo anterior tiver itens, confirme sua origem definindo `ERP_LEGACY_CATALOG_GROUP=mundo-eduk` somente se todos pertencerem a esse grupo. Mantenha a seleção de histórico nas próximas subidas. Em uma instalação sem sementes de demonstração, use somente `classpath:db/legacy`. Contas, setores ou concessões sem correspondência conhecida interrompem a transação para revisão.
+
+Instalações da revisão `e2ea03d` e instalações novas usam a configuração padrão. A verificação integrada prepara uma base da revisão antiga, publica a ficha pela API, atualiza e lê seu conteúdo em duas inicializações consecutivas.
+
+## Conferir um arquivo de materiais
+
+Em **Engenharia → Prévia de materiais**, abra um arquivo CSV UTF-8 com o cabeçalho `código,descrição,unidade`. Separe os campos por vírgula e use aspas duplas em descrições que contenham vírgulas. A tela compara as linhas com o catálogo autorizado do grupo e indica duplicidades e divergências. A conferência é somente leitura.

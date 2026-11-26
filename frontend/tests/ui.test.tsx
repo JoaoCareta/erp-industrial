@@ -59,7 +59,8 @@ test("UI-A1 carregamento, equipe, lista vazia, erro e saída", async () => {
   const logout = vi.fn(),
     token = vi.fn(async () => "jwt");
   let finish!: (rows: unknown[]) => void;
-  useFetch(() => new Promise<unknown[]>(resolve => { finish = resolve }));
+  const pendingTeam = new Promise<unknown[]>(resolve => { finish = resolve });
+  useFetch(() => pendingTeam);
   render(<Workspace token={token} logout={logout} />);
   await screen.findByText("Carregando equipe…");
   expect(screen.queryByRole("alert")).toBeNull();

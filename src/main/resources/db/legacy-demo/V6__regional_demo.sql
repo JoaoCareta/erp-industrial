@@ -1,0 +1,14 @@
+insert into business_group values ('grupo-demo','Grupo de demonstração');
+insert into plant values ('birigui','grupo-demo','Birigui'),('aracatuba','grupo-demo','Araçatuba');
+insert into sector values ('birigui','corte','Corte'),('aracatuba','corte','Corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000004','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000004','Líder Birigui');
+insert into team_member values ('grupo-demo','birigui','corte','00000000-0000-4000-8000-000000000004');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000004','leader','birigui','corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000005','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000005','Líder Araçatuba');
+insert into team_member values ('grupo-demo','aracatuba','corte','00000000-0000-4000-8000-000000000005');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000005','leader','aracatuba','corte');
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000006','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000006','Gerência regional');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000006','regional','birigui',null);
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000006','regional','aracatuba',null);
+insert into account(id,group_id,issuer,subject,name) values ('00000000-0000-4000-8000-000000000007','grupo-demo','${issuer}','00000000-0000-4000-8000-000000000007','Gerência de Birigui');
+insert into assignment values ('grupo-demo','00000000-0000-4000-8000-000000000007','manager','birigui',null);
