@@ -15,6 +15,7 @@ $env:SPRING_FLYWAY_LOCATIONS = 'classpath:db/migration,classpath:db/demo'
 try {
     New-Item -ItemType Directory -Force reports | Out-Null
     docker compose -p $project up -d --wait db
+    if ($Stage -ne 'E2E') { & "$PSScriptRoot/upgrade.ps1" -Project $project }
     if ($Stage -eq 'Integration') {
         & $Gradle test --rerun jacocoTestReport '-PtestSuite=integration'
         return

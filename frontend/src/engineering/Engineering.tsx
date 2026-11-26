@@ -1,3 +1,4 @@
+import { MaterialPreview } from "./MaterialPreview";
 import React, { useEffect, useRef, useState } from "react";
 import type { RequestApi, Run } from "../Workspace";
 type Props = {
@@ -192,13 +193,14 @@ export function Engineering({ api, run, canEdit, canPublish }: Props) {
       </ul>
     </section>
   );
-  return <Sheets key={createdProduct} initialProduct={createdProduct} catalog={catalog} onCatalog={k => {setKind(k);reset();filter("");openCatalog(true)}}
+  return <><MaterialPreview run={run} catalogs={() => Promise.all([api<Item[]>("catalog/material"), api<Item[]>("catalog/unit")])} />
+      <Sheets key={createdProduct} initialProduct={createdProduct} catalog={catalog} onCatalog={k => {setKind(k);reset();filter("");openCatalog(true)}}
         canEdit={canEdit}
         canPublish={canPublish}
         all={all}
         api={api}
         run={run}
-      />;
+      /></>;
 }
 type Piece = {
   partId: string;

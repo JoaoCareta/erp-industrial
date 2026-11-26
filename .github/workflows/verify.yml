@@ -92,6 +92,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
       - *java
       - uses: actions/download-artifact@v4
         with: {name: unit-evidence, path: incoming/unit}
@@ -104,6 +105,8 @@ jobs:
       - shell: pwsh
         run: ./scripts/verify.ps1 -Stage Integration
       - run: cp incoming/architecture/test-results/test/*.xml build/test-results/test/
+      - uses: actions/upload-artifact@v4
+        with: {name: upgrade-evidence, path: reports/upgrade.xml, if-no-files-found: error}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -178,6 +181,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with: {name: e2e-evidence}
       - run: python scripts/catalog.py
+      - uses: actions/download-artifact@v4
+        with: {name: upgrade-evidence, path: reports}
       - run: python scripts/acceptance.py
       - uses: actions/upload-artifact@v4
         if: always()

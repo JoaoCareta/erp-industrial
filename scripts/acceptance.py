@@ -4,14 +4,15 @@ from xml.etree import ElementTree as ET
 import json
 
 suites = {
+    "atualizacao": ("reports/upgrade.xml", ["readsLegacyInstallation()", "upgradesWithoutDemoData()"]),
     "integracao": ("build/test-results/test/TEST-*.xml", [
         "scopedRoles()", "sectorAndSuspension()", "preservesPublishedVersions()", "rejectsInvalidCatalogsAndDrafts()",
         "concurrentRetryAndImmutableHistory()", "httpErrorsAndReadiness()", "moduleBoundaries()"]),
-    "contrato": ("build/test-results/test/TEST-*.xml", ["openApiMatchesHandlers()"]),
-    "interface": ("reports/ui.xml", ["UI-A1 carregamento, equipe, lista vazia, erro e saída",
+    "contrato": ("build/test-results/test/TEST-*.xml", ["openApiMatchesHandlers()", "stockReadsRequestedVersion()"]),
+    "interface": ("reports/ui.xml", ["prévia de materiais por linha", "abre e corrige o arquivo de prévia", "UI-A1 carregamento, equipe, lista vazia, erro e saída",
         "seleção de unidade, setores e revogação", "entrada indisponível e conta suspensa",
         "UI-E2 cadastros, rascunho e histórico consultável", "inicialização OIDC, renovação e saída", "login indisponível"]),
-    "e2e": ("reports/*.xml", ["setor e suspensão com o mesmo token", "funcionário sem concessão","regional escolhe e retoma a unidade",
+    "e2e": ("reports/*.xml", ["troca de operador no mesmo posto", "setor e suspensão com o mesmo token", "funcionário sem concessão","regional escolhe e retoma a unidade",
         "publica V1 e V2 e preserva a composição e o roteiro", "histórico após reiniciar a API"]),
 }
 report = {}
