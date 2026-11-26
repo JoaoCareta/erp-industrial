@@ -21,7 +21,15 @@ class JourneyTest @Autowired constructor(val mvc: MockMvc, val db: org.springfra
     fun principal(id: String) = jwt().jwt { it.subject(id).issuer(System.getenv("OIDC_ISSUER")) }
 
     @Test fun sectorAndSuspension() {
-        mvc.get("/api/units/eduk/sectors/corte/team") { with(leader) }.andExpect { status { isOk() }; jsonPath("$[0].name") { value("Ana") } }
+        val account = "00000000-0000-4000-8000-000000000001"
+        db.update("""insert into assignment(group_id,account_id,role_id,plant_id,sector_id)
+            values ('mundo-eduk',?,'operator','eduk','corte')""", account)
+        mvc.get("/api/units/eduk/sectors/corte/team") { with(leader) }.andExpect {
+            status { isOk() }
+            jsonPath("$[0].id") { value(account) }
+            jsonPath("$[0].name") { value("Ana") }
+            jsonPath("$[0].role") { value("Líder · Operador") }
+        }
         mvc.get("/api/units/eduk/sectors/pintura/team") { with(leader) }.andExpect { status { isForbidden() } }
         mvc.post("/api/units/eduk/accounts/00000000-0000-4000-8000-000000000001/suspension") {
             with(admin); contentType = org.springframework.http.MediaType.APPLICATION_JSON; content = """{"reason":"Teste de suspensão"}"""

@@ -37,11 +37,15 @@ class Catalog(private val db: JdbcTemplate) {
             usable(group,requireNotNull(input.unitId) { "Informe a unidade" }, Kind.unit)
         } else require(input.categoryId == null && input.unitId == null) { "Vínculos exclusivos de matéria-prima" }
         val id = existing ?: UUID.randomUUID()
-        if (existing != null) get(group,id, kind)
-        db.update("""insert into item(group_id,id,kind,code,name,dimension,active,category_id,unit_id) values(?,?,?,?,?,?,?,?,?)
-            on conflict(id) do update set code=excluded.code,name=excluded.name,dimension=excluded.dimension,
-            active=excluded.active,category_id=excluded.category_id,unit_id=excluded.unit_id""",
-            group,id, kind.name, input.code.trim(), input.name.trim(), input.dimension, input.active, input.categoryId, input.unitId)
+        if (existing == null) {
+            db.update("""insert into item(group_id,id,kind,code,name,dimension,active,category_id,unit_id)
+                values(?,?,?,?,?,?,?,?,?)""", group, id, kind.name, input.code.trim(), input.name.trim(),
+                input.dimension, input.active, input.categoryId, input.unitId)
+        } else {
+            db.update("""update item set code=?,name=?,dimension=?,active=?,category_id=?,unit_id=?
+                where group_id=? and id=? and kind=?""", input.code.trim(), input.name.trim(), input.dimension,
+                input.active, input.categoryId, input.unitId, group, id, kind.name)
+        }
         return get(group,id, kind)
     }
 }

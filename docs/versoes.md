@@ -1,6 +1,6 @@
 # Catálogo de versões
 
-O Gradle valida as dependências resolvidas contra o lock durante o build. O npm instala o lockfile com `npm ci`. A distribuição do Gradle e as quatro imagens de serviço têm digest fixado. Este índice fica disponível offline no checkout.
+O Gradle valida as dependências resolvidas contra o lock durante o build. O npm instala o lockfile com `npm ci`. A distribuição do Gradle, as quatro imagens do ERP e a imagem PostgreSQL do ensaio de migração têm digest fixado. Este índice fica disponível offline no checkout.
 
 | Componente | Versão | Consumidor e finalidade | Origem | Manual oficial | Versão publicada |
 |---|---|---|---|---|---|
@@ -11,8 +11,8 @@ O Gradle valida as dependências resolvidas contra o lock durante o build. O npm
 | org.springframework.boot:spring-boot-starter-security-oauth2-resource-server | 4.0.10 | Backend / spring-boot-starter-security-oauth2-resource-server | gradle.lockfile | [API](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html) | [Release](https://github.com/spring-projects/spring-boot/tree/v4.0.10) |
 | tools.jackson.module:jackson-module-kotlin | 3.1.8 | Backend / jackson-module-kotlin | gradle.lockfile | [API](https://github.com/FasterXML/jackson-module-kotlin) | [Release](https://github.com/FasterXML/jackson-module-kotlin/tree/jackson-module-kotlin-3.1.8) |
 | org.jetbrains.kotlin:kotlin-reflect | 2.3.20 | Backend / kotlin-reflect | gradle.lockfile | [API](https://kotlinlang.org/docs/reflection.html) | [Release](https://github.com/JetBrains/kotlin/tree/v2.3.20) |
-| org.flywaydb:flyway-database-postgresql | 11.14.1 | Backend / flyway-database-postgresql | gradle.lockfile | [API](https://documentation.red-gate.com/flyway) | [Release](https://github.com/flyway/flyway/tree/flyway-11.14.1) |
-| org.postgresql:postgresql | 42.7.14 | Backend / postgresql | gradle.lockfile | [API](https://jdbc.postgresql.org/documentation/) | [Release](https://github.com/pgjdbc/pgjdbc/tree/REL42.7.14) |
+| org.flywaydb:flyway-mysql | 11.14.1 | Backend / migrações MariaDB | gradle.lockfile | [API](https://documentation.red-gate.com/flyway/reference/database-driver-reference/mariadb) | [Release](https://github.com/flyway/flyway/tree/flyway-11.14.1) |
+| org.mariadb.jdbc:mariadb-java-client | 3.5.11 | Backend / MariaDB Connector/J | gradle.lockfile | [API](https://mariadb.com/docs/connectors/mariadb-connector-j/about-mariadb-connector-j) | [Release](https://github.com/mariadb-corporation/mariadb-connector-j/releases/tag/3.5.11) |
 | org.springframework.boot:spring-boot-starter-webmvc-test | 4.0.10 | Backend / spring-boot-starter-webmvc-test | gradle.lockfile | [API](https://docs.spring.io/spring-boot/4.0/reference/testing/) | [Release](https://github.com/spring-projects/spring-boot/tree/v4.0.10) |
 | org.springframework.security:spring-security-test | 7.0.9 | Backend / spring-security-test | gradle.lockfile | [API](https://docs.spring.io/spring-security/reference/servlet/test/) | [Release](https://github.com/spring-projects/spring-security/tree/7.0.9) |
 | com.tngtech.archunit:archunit | 1.4.1 | Backend / archunit | gradle.lockfile | [API](https://www.archunit.org/userguide/html/000_Index.html) | [Release](https://github.com/TNG/ArchUnit/tree/v1.4.1) |
@@ -32,8 +32,12 @@ O Gradle valida as dependências resolvidas contra o lock durante o build. O npm
 | vitest | 5.1.2 | Frontend / vitest | frontend/package-lock.json | [API](https://vitest.dev/guide/) | [Release](https://www.npmjs.com/package/vitest/v/5.1.2) |
 | Gradle | 9.1.0 | Ambiente | gradle/wrapper/gradle-wrapper.properties | [API](https://docs.gradle.org/9.1.0/userguide/userguide.html) | [Release](https://docs.gradle.org/9.1.0/release-notes.html) |
 | Kotlin | 2.3.20 | Ambiente | build.gradle.kts | [API](https://kotlinlang.org/docs/home.html) | [Release](https://github.com/JetBrains/kotlin/releases/tag/v2.3.20) |
-| PostgreSQL | 17.9 | Ambiente | compose.yaml | [API](https://www.postgresql.org/docs/17/) | [Release](https://www.postgresql.org/docs/17/release-17-9.html) |
+| MariaDB | 11.4.13 | Banco do ERP | compose.yaml | [API](https://mariadb.com/docs/server) | [Release](https://mariadb.com/docs/release-notes/community-server/11.4/11.4.13) |
+| PostgreSQL | 17.9 | Origem descartável no ensaio de migração | infra/compose.migration-source.yaml | [API](https://www.postgresql.org/docs/17/) | [Release](https://www.postgresql.org/docs/17/release-17-9.html) |
+| psycopg[binary] | 3.2.13 | Migração / leitura do PostgreSQL | scripts/migration-requirements.txt | [API](https://www.psycopg.org/psycopg3/docs/) | [Release](https://pypi.org/project/psycopg/3.2.13/) |
+| PyMySQL | 1.1.2 | Migração / escrita no MariaDB | scripts/migration-requirements.txt | [API](https://pymysql.readthedocs.io/en/latest/) | [Release](https://pypi.org/project/PyMySQL/1.1.2/) |
 | Keycloak | 26.6.1 | Ambiente | compose.yaml | [API](https://www.keycloak.org/documentation) | [Release](https://github.com/keycloak/keycloak/releases/tag/26.6.1) |
 | Node.js | 24.12.0 | Ambiente | .github/workflows/verify.yml | [API](https://nodejs.org/docs/latest-v24.x/api/) | [Release](https://nodejs.org/en/blog/release/v24.12.0) |
 | JDK | 25 | Ambiente | .github/workflows/verify.yml | [API](https://docs.oracle.com/en/java/javase/25/) | [Release](https://openjdk.org/projects/jdk/25/) |
+| GitHub REST API | 2022-11-28 | Consulta ao PR que introduziu o commit de produção | scripts/merged_release.py | [API](https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-pull-requests-associated-with-a-commit) | [Release](https://docs.github.com/en/rest/about-the-rest-api/api-versions) |
 | nginx | 1.28 | Ambiente | compose.yaml | [API](https://nginx.org/en/docs/) | [Release](https://nginx.org/en/CHANGES-1.28) |

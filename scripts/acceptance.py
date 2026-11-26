@@ -4,10 +4,12 @@ from xml.etree import ElementTree as ET
 import json
 
 suites = {
-    "atualizacao": ("reports/upgrade.xml", ["readsLegacyInstallation()", "upgradesWithoutDemoData()"]),
+    "atualizacao-legada": ("reports/upgrade-legacy.xml", ["readsLegacyInstallation()", "preservesAuditAndContinuesSequence()"]),
+    "atualizacao-por-unidade": ("reports/upgrade-scoped.xml", ["readsLegacyInstallation()", "preservesAuditAndContinuesSequence()"]),
     "integracao": ("build/test-results/test/TEST-*.xml", [
         "scopedRoles()", "sectorAndSuspension()", "preservesPublishedVersions()", "rejectsInvalidCatalogsAndDrafts()",
-        "concurrentRetryAndImmutableHistory()", "httpErrorsAndReadiness()", "moduleBoundaries()"]),
+        "concurrentRetryAndImmutableHistory()", "duplicateGrantsAreRejectedAtEveryScope()", "oidcIdentityUsesExactStringComparison()",
+        "auditPreservesUtcMicrosecondsAfter2038()", "httpErrorsAndReadiness()", "moduleBoundaries()"]),
     "contrato": ("build/test-results/test/TEST-*.xml", ["openApiMatchesHandlers()", "stockReadsRequestedVersion()"]),
     "interface": ("reports/ui.xml", ["prévia de materiais por linha", "abre e corrige o arquivo de prévia", "UI-A1 carregamento, equipe, lista vazia, erro e saída",
         "seleção de unidade, setores e revogação", "entrada indisponível e conta suspensa",

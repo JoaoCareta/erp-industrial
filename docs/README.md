@@ -5,6 +5,8 @@
 - [Requisitos industriais e vínculos às fórmulas do Excel](aderencia-requisitos-industriais.md)
 - [Escopo das três entregas, matriz de aceite e decisões em aberto](plano-fundacao-acesso-engenharia.md)
 - [Próximas quatro entregas enquanto a fábrica valida a OS de referência](plano-quatro-entregas.md)
+- [Transferir e conferir os dados de uma instalação PostgreSQL no MariaDB](migracao-mariadb.md)
+- [Publicação na hospedagem da Mundo Eduk e deploy após merge](deploy.md)
 - [Versões e referências oficiais](versoes.md)
 - [Contrato HTTP OpenAPI](openapi.json)
 

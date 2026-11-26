@@ -23,21 +23,29 @@ class PublicationTest @Autowired constructor(val catalog: Catalog, val sheets: S
         val part = catalog.save("mundo-eduk",Kind.part,ItemInput(code,"Peça"),null)
         val sheet = Sheet(listOf(PieceLine(part.id,2,listOf("corte"))),emptyList())
         val draft = sheets.create("mundo-eduk",product.id,sheet)
-        val pool = Executors.newFixedThreadPool(2)
-        val barrier = CyclicBarrier(2)
-        try {
-            val calls = List(2) { pool.submit(Callable {
-                barrier.await(10,TimeUnit.SECONDS)
-                sheets.publish("mundo-eduk",product.id,draft.id,1,"teste")
-            }) }
-            assertEquals(listOf(1,1), calls.map { it.get(20,TimeUnit.SECONDS) })
-        } finally { pool.shutdownNow() }
+        fun publishTogether(first: Draft, second: Draft): List<Int> {
+            val pool = Executors.newFixedThreadPool(2)
+            val barrier = CyclicBarrier(2)
+            try {
+                val calls = listOf(first, second).map { candidate ->
+                    pool.submit(Callable {
+                        barrier.await(10, TimeUnit.SECONDS)
+                        sheets.publish("mundo-eduk", product.id, candidate.id, candidate.revision, "teste")
+                    })
+                }
+                return calls.map { it.get(20, TimeUnit.SECONDS) }.sorted()
+            } finally { pool.shutdownNow() }
+        }
+        assertEquals(listOf(1,1), publishTogether(draft, draft))
         assertThrows<DataAccessException> { db.update("update publication set actor='outro' where draft_id=?",draft.id) }
         assertThrows<DataAccessException> { db.update("delete from publication where draft_id=?",draft.id) }
         assertEquals(listOf(1),sheets.versions("mundo-eduk",product.id))
+        val second = sheets.create("mundo-eduk",product.id,sheet)
+        val third = sheets.create("mundo-eduk",product.id,sheet)
+        assertEquals(listOf(2,3), publishTogether(second, third))
         val invalidated = sheets.create("mundo-eduk",product.id,sheet)
         catalog.save("mundo-eduk",Kind.part,part.value.copy(active=false),part.id)
         assertThrows<IllegalArgumentException> { sheets.publish("mundo-eduk",product.id,invalidated.id,1,"teste") }
-        assertEquals(listOf(1),sheets.versions("mundo-eduk",product.id))
+        assertEquals(listOf(1,2,3),sheets.versions("mundo-eduk",product.id))
     }
 }

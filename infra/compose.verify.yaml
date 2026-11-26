@@ -2,10 +2,11 @@ services:
   db:
     volumes: !override []
     tmpfs:
-      - /var/lib/postgresql/data
+      - /var/lib/mysql
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?verification database password required}
-      POSTGRES_INITDB_ARGS: --no-sync
+      MARIADB_PASSWORD: ${DB_PASSWORD:?verification database password required}
+      MARIADB_RANDOM_ROOT_PASSWORD: !reset null
+      MARIADB_ROOT_PASSWORD: ${ERP_VERIFY_ROOT_PASSWORD:?verification root password required}
   api:
     environment:
       DB_PASSWORD: ${DB_PASSWORD:?verification database password required}

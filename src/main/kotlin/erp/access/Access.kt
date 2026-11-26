@@ -56,6 +56,7 @@ class Access(private val db: JdbcTemplate, private val audit: Audit) {
 data class Sector(val id: String, val name: String)
 data class WorkUnit(val id: String,val name: String,val groupName: String,val actions: List<String?>,val sectors: List<Sector>)
 data class WorkContext(val accountId: UUID,val units: List<WorkUnit>)
+data class TeamMember(val id: UUID, val name: String, val role: String?)
 
 @RestController
 @RequestMapping("/api")
@@ -64,16 +65,17 @@ class Accounts(private val access: Access, private val db: JdbcTemplate) {
     fun context(@AuthenticationPrincipal jwt: Jwt) = access.context(jwt)
 
     @GetMapping("/units/{plant}/sectors/{sector}/team")
-    fun team(@AuthenticationPrincipal jwt: Jwt, @PathVariable plant: String, @PathVariable sector: String): List<Map<String, Any?>> {
+    fun team(@AuthenticationPrincipal jwt: Jwt, @PathVariable plant: String, @PathVariable sector: String): List<TeamMember> {
         access.check(jwt, "team.read", plant, sector)
-        return db.queryForList("""
-            select a.id, a.name, string_agg(r.name, ' · ' order by r.name) as role
+        return db.query("""
+            select a.id, a.name, group_concat(r.name order by r.name separator ' · ') as role
             from team_member m join account a on a.id=m.account_id
             left join assignment b on b.account_id=m.account_id
                 and b.plant_id=m.plant_id and b.sector_id=m.sector_id
             left join job_role r on r.id=b.role_id
             where m.plant_id=? and m.sector_id=? and a.active
             group by a.id,a.name order by a.name,a.id
-        """, plant,sector)
+        """, { row, _ -> TeamMember(row.getObject("id", UUID::class.java), row.getString("name"), row.getString("role")) },
+            plant,sector)
     }
 }
