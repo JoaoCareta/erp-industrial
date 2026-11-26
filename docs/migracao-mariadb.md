@@ -68,6 +68,8 @@ docker compose -p erp-industrial-dev stop api
 
 ## 3. Copiar e reconciliar
 
+Para bancos remotos, configure `ERP_SOURCE_HOST` e `ERP_TARGET_HOST` no ambiente que fornece as senhas. Ambos usam `127.0.0.1` por padrão. Os argumentos opcionais `--source-host` e `--target-host` conferem os destinos configurados antes da conexão.
+
 Use CPython 3.10 a 3.14 e o arquivo de versões dos dois drivers. O exemplo usa PowerShell 7.4+ e um ambiente virtual separado. A porta de destino corresponde ao Compose local. Informe a senha do usuário `erp` do MariaDB. Na configuração sintética de desenvolvimento, o padrão é `local-demo`. [Psycopg](https://pypi.org/project/psycopg-binary/3.2.13/) · [PyMySQL](https://pypi.org/project/PyMySQL/1.1.2/)
 
 ```powershell

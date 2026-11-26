@@ -200,6 +200,13 @@ def endpoint_name(value):
     return value
 
 
+def configured_host(role, requested):
+    host = endpoint_host(os.environ.get(f"ERP_{role.upper()}_HOST", "127.0.0.1"))
+    if requested is not None and requested != host:
+        raise ValueError(f"Requested {role} host differs from ERP_{role.upper()}_HOST.")
+    return host
+
+
 def endpoint_port(value):
     port = int(value)
     if not 1 <= port <= 65535:
@@ -210,7 +217,7 @@ def endpoint_port(value):
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     for prefix, port in (("source", 5432), ("target", 3306)):
-        parser.add_argument(f"--{prefix}-host", default="127.0.0.1", type=endpoint_host)
+        parser.add_argument(f"--{prefix}-host", type=endpoint_host)
         parser.add_argument(f"--{prefix}-port", default=port, type=endpoint_port)
         parser.add_argument(f"--{prefix}-database", default="erp", type=endpoint_name)
         parser.add_argument(f"--{prefix}-user", default="erp", type=endpoint_name)
@@ -221,9 +228,9 @@ def parse_args():
 def connections(args):
     import psycopg
     import pymysql
-    with psycopg.connect(host=args.source_host, port=args.source_port, dbname=args.source_database,
+    with psycopg.connect(host=configured_host("source", args.source_host), port=args.source_port, dbname=args.source_database,
                          user=args.source_user, password=os.environ["ERP_SOURCE_PASSWORD"]) as source:
-        with closing(pymysql.connect(host=args.target_host, port=args.target_port, db=args.target_database,
+        with closing(pymysql.connect(host=configured_host("target", args.target_host), port=args.target_port, db=args.target_database,
                                      user=args.target_user, password=os.environ["ERP_TARGET_PASSWORD"],
                                      charset="utf8mb4")) as target:
             yield source, target

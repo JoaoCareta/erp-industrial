@@ -4,10 +4,17 @@ from unittest import TestCase, main
 from uuid import UUID
 
 from argparse import ArgumentTypeError
-from migrate_database import BOOTSTRAP, column_value, endpoint_host, endpoint_name, endpoint_port, signature
+from unittest.mock import patch
+from migrate_database import BOOTSTRAP, column_value, configured_host, endpoint_host, endpoint_name, endpoint_port, signature
 
 
 class TransferTest(TestCase):
+    @patch.dict("os.environ", {"ERP_TARGET_HOST": "maria.internal"})
+    def test_cli_cannot_redirect_credentials_to_another_host(self):
+        self.assertEqual(configured_host("target", "maria.internal"), "maria.internal")
+        with self.assertRaises(ValueError):
+            configured_host("target", "other.internal")
+
     def test_connection_arguments_allow_only_one_endpoint(self):
         for host in ("db.example.test", "127.0.0.1", "::1"):
             self.assertEqual(endpoint_host(host), host)
