@@ -3,10 +3,19 @@ from datetime import datetime, timedelta, timezone
 from unittest import TestCase, main
 from uuid import UUID
 
-from migrate_database import BOOTSTRAP, column_value, signature
+from argparse import ArgumentTypeError
+from migrate_database import BOOTSTRAP, column_value, endpoint_host, endpoint_name, endpoint_port, signature
 
 
 class TransferTest(TestCase):
+    def test_connection_arguments_allow_only_one_endpoint(self):
+        for host in ("db.example.test", "127.0.0.1", "::1"):
+            self.assertEqual(endpoint_host(host), host)
+        for validator, value in ((endpoint_host, "db,other"), (endpoint_name, "erp?mode=test"),
+                                 (endpoint_port, "65536"), (endpoint_port, "0")):
+            with self.assertRaises(ArgumentTypeError):
+                validator(value)
+
     def test_postgres_and_mariadb_driver_values_compare_exactly(self):
         instant = datetime(2026, 11, 26, 12, 0, 1, 9)
         offset = timezone(timedelta(hours=-3))

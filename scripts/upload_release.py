@@ -41,7 +41,7 @@ def upload(host, user, sha, run_number, bundle, key, pins):
     enter = f'cd "$HOME/{stage}"'
     try:
         subprocess.run(["scp", *options, str(bundle), "scripts/deploy_release.py", f"{host}:{stage}/"], check=True)
-        subprocess.run([*ssh, f'{enter} && python3 deploy_release.py {sha} {run_number} "$PWD/release.tar.gz"'], check=True)
+        subprocess.run([*ssh, f'{enter} && python3 deploy_release.py {sha} {run_number}'], check=True)
     finally:
         subprocess.run([*ssh, f'{enter} && rm -f -- release.tar.gz deploy_release.py && cd .. && rmdir -- {stage}'],
                        check=True)

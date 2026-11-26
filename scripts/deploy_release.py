@@ -198,11 +198,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("sha")
     parser.add_argument("run_number", type=int)
-    parser.add_argument("bundle", type=Path)
     args = parser.parse_args()
     store = Path.home() / ".local/share/erp-industrial"
     store.mkdir(mode=0o700, parents=True, exist_ok=True)
     config = json.loads((Path.home() / ".config/erp-industrial/deploy.json").read_text(encoding="utf8"))
     with (store / "deploy.lock").open("a") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-        promote(args.sha, args.run_number, args.bundle, config, store)
+        promote(args.sha, args.run_number, Path(__file__).resolve().with_name("release.tar.gz"), config, store)

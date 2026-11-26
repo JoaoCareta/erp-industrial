@@ -41,7 +41,7 @@ class UploadReleaseTest(unittest.TestCase):
         self.assertIn("StrictHostKeyChecking=yes", transfer)
         self.assertIn("UserKnownHostsFile=pins", transfer)
         self.assertIn("server.example:.erp-upload.a123456789/", transfer)
-        self.assertIn(f'python3 deploy_release.py {sha} 27 "$PWD/release.tar.gz"', activate[-1])
+        self.assertTrue(activate[-1].endswith(f'python3 deploy_release.py {sha} 27'))
         self.assertIn('rm -f -- release.tar.gz deploy_release.py', cleanup[-1])
         self.assertNotIn("rm -r", cleanup[-1])
 

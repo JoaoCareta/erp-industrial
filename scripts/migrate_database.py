@@ -3,8 +3,10 @@ import argparse
 from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 import hashlib
+from ipaddress import IPv6Address
 import json
 import os
+import re
 from uuid import UUID
 
 # Column order is explicit because the pre-group upgrade appended item.group_id.
@@ -183,13 +185,35 @@ def transfer(source, target):
             print(f"{table}: {count} SHA-256 {digest}")
 
 
+def endpoint_host(value):
+    if re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?", value):
+        return value
+    try:
+        return str(IPv6Address(value))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("Expected a database hostname or IP address.") from error
+
+
+def endpoint_name(value):
+    if not re.fullmatch(r"[\w.@-]+", value):
+        raise argparse.ArgumentTypeError("Expected a single database or account name.")
+    return value
+
+
+def endpoint_port(value):
+    port = int(value)
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError("Expected a port between 1 and 65535.")
+    return port
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     for prefix, port in (("source", 5432), ("target", 3306)):
-        parser.add_argument(f"--{prefix}-host", default="127.0.0.1")
-        parser.add_argument(f"--{prefix}-port", default=port, type=int)
-        parser.add_argument(f"--{prefix}-database", default="erp")
-        parser.add_argument(f"--{prefix}-user", default="erp")
+        parser.add_argument(f"--{prefix}-host", default="127.0.0.1", type=endpoint_host)
+        parser.add_argument(f"--{prefix}-port", default=port, type=endpoint_port)
+        parser.add_argument(f"--{prefix}-database", default="erp", type=endpoint_name)
+        parser.add_argument(f"--{prefix}-user", default="erp", type=endpoint_name)
     return parser.parse_args()
 
 
