@@ -1,4 +1,4 @@
-param([string]$Base)
+param([string]$Base, [ValidateSet('All','Integration','E2E')][string]$Stage = 'All')
 . "$PSScriptRoot/common.ps1"
 $project = 'erp-check-' + [guid]::NewGuid().ToString('N')
 $env:COMPOSE_FILE = 'compose.yaml' + [IO.Path]::PathSeparator + 'infra/compose.verify.yaml'
@@ -15,11 +15,17 @@ $env:SPRING_FLYWAY_LOCATIONS = 'classpath:db/migration,classpath:db/demo'
 try {
     New-Item -ItemType Directory -Force reports | Out-Null
     docker compose -p $project up -d --wait db
-    & $Gradle test --rerun jacocoTestReport installDist
-    Frontend @('run','build')
-    Frontend @('test')
-    Frontend @('audit','--audit-level=critical')
-    python scripts/advisories.py
+    if ($Stage -eq 'Integration') {
+        & $Gradle test --rerun jacocoTestReport '-PtestSuite=integration'
+        return
+    }
+    if ($Stage -eq 'All') {
+        & $Gradle test --rerun jacocoTestReport installDist
+        Frontend @('run','build')
+        Frontend @('test')
+        Frontend @('audit','--audit-level=critical')
+        python scripts/advisories.py
+    }
     $env:PLAYWRIGHT_JUNIT_OUTPUT_NAME = '../reports/journeys.xml'
     Start-Erp $project 18081
     Frontend @('exec','--','playwright','install','chromium')
@@ -28,6 +34,7 @@ try {
     Wait-Endpoint 'http://localhost:18081/api/ready'
     $env:PLAYWRIGHT_JUNIT_OUTPUT_NAME = '../reports/history.xml'
     Frontend @('run','e2e','--','history.spec.ts')
+    if ($Stage -eq 'E2E') { return }
     python scripts/acceptance.py
     python scripts/catalog.py
     python scripts/test_coverage.py

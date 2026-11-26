@@ -25,9 +25,23 @@ dependencies {
     testImplementation("com.tngtech.archunit:archunit:1.4.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
-tasks.test { useJUnitPlatform() }
+val testSuite = providers.gradleProperty("testSuite").getOrElse("all")
+tasks.test {
+    useJUnitPlatform {
+        when (testSuite) {
+            "unit" -> includeTags("unit")
+            "architecture" -> includeTags("architecture")
+            "integration" -> excludeTags("unit", "architecture")
+            "all" -> Unit
+            else -> error("Unknown test suite: $testSuite")
+        }
+    }
+}
 jacoco { toolVersion = "0.8.14" }
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+    if (testSuite == "integration") {
+        executionData(files("reports/unit.exec", "reports/architecture.exec"))
+    }
     reports { xml.required.set(true); html.required.set(true) }
 }
