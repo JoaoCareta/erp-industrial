@@ -164,10 +164,53 @@ jobs:
         if: always()
         with: {name: coverage, path: reports/coverage.json, if-no-files-found: error}
 
+  sonar:
+    name: SonarCloud coverage
+    needs: [frontend-unit, integration]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/download-artifact@v4
+        with: {name: ui-evidence}
+      - uses: actions/download-artifact@v4
+        with: {name: backend-evidence, path: build}
+      - name: Prepare coverage from both test suites
+        run: |
+          test -s build/reports/jacoco/test/jacocoTestReport.xml
+          test -s frontend/coverage/lcov.info
+          sed -i 's|^SF:src/|SF:frontend/src/|' frontend/coverage/lcov.info
+          grep -q '^SF:frontend/src/' frontend/coverage/lcov.info
+      - uses: SonarSource/sonarqube-auth-action@a0aa643acde4162396015b4f12536c1b9c4aab82
+        with: {project-key: JoaoCareta_erp-industrial}
+      - uses: SonarSource/sonarqube-scan-action@70bad232163b09d998ea0707ee80c0ec80798c16
+      - name: Record SonarCloud coverage
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          metric=coverage
+          query="branch=master"
+          if [ -n "$PR_NUMBER" ]; then
+            metric=new_coverage
+            query="pullRequest=$PR_NUMBER"
+          fi
+          curl --fail --retry 3 --silent --show-error --get https://sonarcloud.io/api/measures/component \
+            --data-urlencode component=JoaoCareta_erp-industrial --data-urlencode "$query" \
+            --data-urlencode "metricKeys=$metric,lines_to_cover,new_lines_to_cover,uncovered_lines,new_uncovered_lines,line_coverage,new_line_coverage,branch_coverage,new_branch_coverage" -o sonar-coverage.json
+          jq -er --arg key "$metric" '.component.measures[] | select(.metric==$key) | (.value // .period.value // .periods[0].value) + "%"' sonar-coverage.json >> "$GITHUB_STEP_SUMMARY" || {
+            jq -e --arg key new_lines_to_cover 'any(.component.measures[]; .metric==$key and (.period.value // .periods[0].value // .value)=="0")' sonar-coverage.json
+            echo "Sem linhas novas aplicáveis à cobertura." >> "$GITHUB_STEP_SUMMARY"
+          }
+      - uses: actions/upload-artifact@v4
+        with: {name: sonar-coverage, path: sonar-coverage.json, if-no-files-found: error}
+
   verify:
     name: Verificação final
     if: always()
-    needs: [frontend-quality, frontend-unit, backend-quality, backend-unit, integration, coverage, e2e]
+    needs: [frontend-quality, frontend-unit, backend-quality, backend-unit, integration, coverage, e2e, sonar]
     runs-on: ubuntu-24.04
     steps:
       - name: Exigir sucesso de todos os jobs

@@ -91,7 +91,7 @@ drop table legacy_access.entitlement, legacy_access.account, legacy_access.secto
 drop schema legacy_access;
 
 alter table item add column group_id text references business_group;
-update item set group_id='mundo-eduk';
+update item set group_id='mundo-eduk' where group_id is null;
 alter table item alter column group_id set not null;
 alter table item drop constraint item_kind_code_key, drop constraint item_category_id_fkey, drop constraint item_unit_id_fkey;
 alter table item add unique(group_id,kind,code), add unique(group_id,id);
