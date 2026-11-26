@@ -2,6 +2,7 @@ package erp.engineering
 
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import tools.jackson.module.kotlin.readValue
 import erp.access.Access
 import org.springframework.jdbc.core.JdbcTemplate
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.http.HttpStatus
 import erp.engineering.domain.Sheet
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 import java.util.UUID
 
 data class Revision(val revision: Int)
@@ -35,7 +38,7 @@ class Sheets(private val db: JdbcTemplate, private val catalog: Catalog, private
     @Transactional fun create(group: String, product: UUID, sheet: Sheet): Draft {
         checkSheet(group,product, sheet)
         val id = UUID.randomUUID()
-        db.update("insert into draft values(?,?,1,?::jsonb)", id, product, json.writeValueAsString(sheet))
+        db.update("insert into draft(id,product_id,revision,body) values(?,?,1,?)", id, product, json.writeValueAsString(sheet))
         return Draft(id, 1, sheet)
     }
     private fun lockDraft(product: UUID, id: UUID): Draft = db.query(
@@ -48,7 +51,7 @@ class Sheets(private val db: JdbcTemplate, private val catalog: Catalog, private
         val current = lockDraft(product,id)
         if (current.revision != edit.revision || published(id) != null) throw ResponseStatusException(HttpStatus.CONFLICT)
         checkSheet(group,product, edit.sheet)
-        db.update("update draft set revision=revision+1,body=?::jsonb where id=?", json.writeValueAsString(edit.sheet),id)
+        db.update("update draft set revision=revision+1,body=? where id=?", json.writeValueAsString(edit.sheet),id)
         return Draft(id,current.revision+1,edit.sheet)
     }
     private fun published(id: UUID) = db.queryForList("select version from publication where draft_id=?", Int::class.java,id).firstOrNull()
@@ -61,15 +64,24 @@ class Sheets(private val db: JdbcTemplate, private val catalog: Catalog, private
         published(id)?.let { return it }
         db.queryForObject("select id from item where id=? for update",UUID::class.java,product)
         val body = checkSheet(group,product,draft.sheet)
-        return db.queryForObject("""insert into publication(product_id,version,draft_id,actor,body)
-            select ?,coalesce(max(version),0)+1,?,?,?::jsonb from publication where product_id=? returning version""",
-            Int::class.java,product,id,actor,json.writeValueAsString(body),product)!!
+        val nextVersion = db.queryForObject("select coalesce(max(version),0)+1 from publication where product_id=?",
+            Int::class.java, product)!!
+        db.update("insert into publication(product_id,version,draft_id,actor,body) values(?,?,?,?,?)",
+            product, nextVersion, id, actor, json.writeValueAsString(body))
+        return nextVersion
     }
     fun versions(group: String, product: UUID) = db.query("select version from publication where product_id in (select id from item where group_id=? and id=?) order by version", { r, _ -> r.getInt(1) }, group,product)
     fun version(group: String, product: UUID, version: Int): JsonNode = db.query(
-        """select body || jsonb_build_object('version',version,'publishedAt',published_at,'actor',actor)
-            from publication where product_id in (select id from item where group_id=? and id=?) and version=?""",
-        { r, _ -> json.readTree(r.getString(1)) },group,product,version
+        """select body,version,published_at,actor from publication
+            where product_id in (select id from item where group_id=? and id=?) and version=?""",
+        { r, _ ->
+            val publishedAt = r.getObject("published_at", LocalDateTime::class.java)
+            json.readValue(r.getString("body"), ObjectNode::class.java).apply {
+                put("version", r.getInt("version"))
+                put("publishedAt", ISO_LOCAL_DATE_TIME.format(publishedAt) + "+00:00")
+                put("actor", r.getString("actor"))
+            }
+        }, group,product,version
     ).firstOrNull() ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
 }
 

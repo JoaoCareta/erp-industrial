@@ -129,7 +129,8 @@ class EngineeringTest @Autowired constructor(val mvc: MockMvc, val json: ObjectM
         mvc.get("/api/ready").andExpect { status { isOk() } }
         mvc.get("/api/units/eduk/sectors/corte/team").andExpect { status { isUnauthorized() } }
         mvc.post("/api/units/eduk/catalog/part") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"code":"","name":"teste"}""" }.andExpect { status { isBadRequest() } }
-        item(Kind.part)
+        val original = item(Kind.part)
         mvc.post("/api/units/eduk/catalog/part") { with(actor); contentType=MediaType.APPLICATION_JSON;content="""{"code":"part","name":"outra"}""" }.andExpect { status { isConflict() } }
+        assertEquals(original, catalog.get("mundo-eduk",original.id,Kind.part))
     }
 }

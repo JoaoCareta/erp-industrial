@@ -6,14 +6,16 @@ $env:ERP_VERIFY_PROJECT = $project
 $env:DB_PORT = '55433'
 $env:WEB_PORT = '18081'
 $env:WEB_ORIGIN = 'http://localhost:18081'
-$env:DB_URL = "jdbc:postgresql://localhost:$($env:DB_PORT)/erp"
+$env:DB_URL = "jdbc:mariadb://localhost:$($env:DB_PORT)/erp"
 $env:DB_USER = 'erp'
 $env:DB_PASSWORD = [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
+$env:ERP_VERIFY_ROOT_PASSWORD = [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))
 $env:OIDC_ISSUER = "$env:WEB_ORIGIN/auth/realms/industrial"
 $env:OIDC_JWKS = "$env:OIDC_ISSUER/protocol/openid-connect/certs"
 $env:SPRING_FLYWAY_LOCATIONS = 'classpath:db/migration,classpath:db/demo'
 try {
     New-Item -ItemType Directory -Force reports | Out-Null
+    if ($Stage -ne 'E2E') { python scripts/test_migrate_database.py }
     docker compose -p $project up -d --wait db
     if ($Stage -ne 'E2E') { & "$PSScriptRoot/upgrade.ps1" -Project $project }
     if ($Stage -eq 'Integration') {

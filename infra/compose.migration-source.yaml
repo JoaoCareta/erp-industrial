@@ -1,0 +1,17 @@
+services:
+  postgres-source:
+    image: postgres:17.9-alpine@sha256:c7526c0f6c3f30260a563d7bcf8ad778effac59a44f8ffa86678c35418338609
+    environment:
+      POSTGRES_DB: erp
+      POSTGRES_USER: erp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?verification database password required}
+    ports:
+      - target: 5432
+        host_ip: 127.0.0.1
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "erp", "-d", "erp"]
+      interval: 2s
+      timeout: 3s
+      retries: 60

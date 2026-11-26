@@ -1,10 +1,10 @@
 # ERP Industrial
 
-Monólito Kotlin/Spring Boot, interface React/TypeScript, PostgreSQL com Flyway e login individual pelo Keycloak. A implementação cobre a consulta de equipe, o bloqueio de contas suspensas, os cinco cadastros de Engenharia e a publicação de composição e roteiro por versão.
+Monólito Kotlin/Spring Boot, interface React/TypeScript, MariaDB com Flyway e login individual pelo Keycloak. A implementação cobre a consulta de equipe, o bloqueio de contas suspensas, os cinco cadastros de Engenharia e a publicação de composição e roteiro por versão.
 
 ## Executar a partir de um checkout limpo
 
-O frontend ([frontend/](frontend/)), a API ([src/main/kotlin/erp/](src/main/kotlin/erp/)), as [migrações](src/main/resources/db/migration/) e a [infraestrutura](infra/) são versionados juntos. O [Compose](compose.yaml) sobe Nginx, API, PostgreSQL e Keycloak. O script de subida primeiro gera os arquivos estáticos e a distribuição JVM que os contêineres montam.
+O frontend ([frontend/](frontend/)), a API ([src/main/kotlin/erp/](src/main/kotlin/erp/)), as [migrações](src/main/resources/db/migration/) e a [infraestrutura](infra/) são versionados juntos. O [Compose](compose.yaml) sobe Nginx, API, MariaDB e Keycloak. O script de subida primeiro gera os arquivos estáticos e a distribuição JVM que os contêineres montam.
 
 **Homologação compartilhada.** O Compose fornecido serve para demonstração local. Para hospedar em outro domínio, a Infra precisa configurar HTTPS, a origem pública no Keycloak, os redirecionamentos do cliente e o mesmo emissor OIDC no ERP. Configure segredos próprios, armazenamento persistente e backup do banco e da identidade. O realm e as migrações em `db/demo` contêm contas e dados sintéticos. A prontidão da API pode ser conferida em `/api/ready`.
 
@@ -21,7 +21,7 @@ Abra [o ERP local](http://localhost:18080). Os serviços de desenvolvimento usam
 
 ## Checks de merge na master
 
-Cada PR executa os testes de front-end (Vitest) e back-end (JUnit) em jobs independentes. No Kotlin, marque os testes unitários com `@Tag("unit")` e os de arquitetura com `@Tag("architecture")`. Os demais rodam na integração com PostgreSQL. Para rodar somente os unitários, use `./gradlew test -PtestSuite=unit` e `npm test` na pasta `frontend`.
+Cada PR executa os testes de front-end (Vitest) e back-end (JUnit) em jobs independentes. No Kotlin, marque os testes unitários com `@Tag("unit")` e os de arquitetura com `@Tag("architecture")`. Os demais rodam na integração com MariaDB. Para rodar somente os unitários, use `./gradlew test -PtestSuite=unit` e `npm test` na pasta `frontend`.
 
 O check `Coverage >= 90%` compara as linhas executáveis alteradas no Kotlin e no TypeScript com o SHA da base do PR. Ele combina as três execuções do JaCoCo e lê o LCOV do Vitest. Cada módulo precisa atingir 90% de linhas e de branches, no total e no diff. Uma linha nova sem cobertura reprova o módulo se for a única linha executável alterada nele.
 
@@ -52,11 +52,9 @@ Com a conta de administração, abra Engenharia e escolha um produto para consul
 
 O [índice de documentação](docs/README.md) reúne contratos, decisões, plano de implementação e catálogo de versões.
 
-## Atualizar a demonstração anterior às unidades
+## Migrar uma instalação PostgreSQL
 
-Para um banco criado pela revisão `2f8fd85`, selecione a sequência Flyway que conserva os checksums originais. No Compose, defina `ERP_FLYWAY_LOCATIONS=classpath:db/legacy,classpath:db/legacy-demo` para a base sintética. Quando o catálogo anterior tiver itens, confirme sua origem definindo `ERP_LEGACY_CATALOG_GROUP=mundo-eduk` somente se todos pertencerem a esse grupo. Mantenha a seleção de histórico nas próximas subidas. Em uma instalação sem sementes de demonstração, use somente `classpath:db/legacy`. Contas, setores ou concessões sem correspondência conhecida interrompem a transação para revisão.
-
-Instalações da revisão `e2ea03d` e instalações novas usam a configuração padrão. A verificação integrada prepara uma base da revisão antiga, publica a ficha pela API, atualiza e lê seu conteúdo em duas inicializações consecutivas.
+O Compose inicia o MariaDB em um volume próprio. Para conservar contas, permissões, cadastros, rascunhos e publicações de um PostgreSQL existente, siga o [procedimento de transferência e conferência](docs/migracao-mariadb.md) antes de abrir o ERP para escrita. O procedimento também cobre a instalação anterior à divisão por grupos e unidades.
 
 ## Conferir um arquivo de materiais
 

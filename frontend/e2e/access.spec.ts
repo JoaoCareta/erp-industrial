@@ -45,8 +45,13 @@ test("setor e suspensão com o mesmo token", async ({ page, browser }) => {
   // Simulate an external account suspension in the disposable verification database.
   const project = process.env.ERP_VERIFY_PROJECT;
   if (!project || !/^erp-check-[a-f0-9]{32}$/.test(project)) throw Error("Use scripts/verify.ps1");
-  execFileSync("docker", ["compose","-p",project,"exec","-T","db","psql","-U","erp","-d","erp","-v","ON_ERROR_STOP=1","-c",
-    "update account set active=false where subject='00000000-0000-4000-8000-000000000001'"], {cwd:resolve("..")});
+  execFileSync("docker", [
+    "compose", "-p", project, "exec", "-T", "db", "sh", "-c",
+    'MYSQL_PWD="$MARIADB_PASSWORD" exec mariadb --user="$MARIADB_USER" "$MARIADB_DATABASE"',
+  ], {
+    cwd: resolve(".."),
+    input: "UPDATE account SET active = FALSE WHERE subject = '00000000-0000-4000-8000-000000000001';",
+  });
   expect(
     (
       await page.request.get("/api/units/eduk/sectors/corte/team", {
