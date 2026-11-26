@@ -534,7 +534,13 @@ function RouteEditor({steps,update}:{steps:string[];update:(steps:string[])=>voi
     <strong>Prévia do roteiro</strong><p>Arraste as etapas para alterar a ordem.</p>
     <ul className="route-preview" aria-label="Prévia do roteiro">{steps.map((step,i)=><li key={step}>
       <button type="button" aria-label={step} draggable onDragStart={event=>{dragged.current=i;event.dataTransfer.setData("text/plain",step)}}
-        onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(dragged.current!==null)move(dragged.current,i);dragged.current=null}}
+        onDragOver={event=>event.preventDefault()} onDrop={event => {
+          event.preventDefault();
+          if (dragged.current !== null) {
+            move(dragged.current, i);
+          }
+          dragged.current = null;
+        }}
         onDragEnd={()=>{dragged.current=null}}
         onKeyDown={event=>{if(["ArrowLeft","ArrowRight"].includes(event.key)){event.preventDefault();move(i,i+(event.key==="ArrowLeft"?-1:1))}}}
         title="Arraste ou use as setas do teclado">{step}</button></li>)}</ul>
