@@ -5,7 +5,6 @@ plugins {
     jacoco
 }
 
-repositories { mavenCentral() }
 application { mainClass.set("erp.ApplicationKt") }
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21) } }
 java { targetCompatibility = JavaVersion.VERSION_21 }
