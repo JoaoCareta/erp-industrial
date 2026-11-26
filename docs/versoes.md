@@ -39,4 +39,5 @@ O Gradle valida as dependências resolvidas contra o lock durante o build. O npm
 | Keycloak | 26.6.1 | Ambiente | compose.yaml | [API](https://www.keycloak.org/documentation) | [Release](https://github.com/keycloak/keycloak/releases/tag/26.6.1) |
 | Node.js | 24.12.0 | Ambiente | .github/workflows/verify.yml | [API](https://nodejs.org/docs/latest-v24.x/api/) | [Release](https://nodejs.org/en/blog/release/v24.12.0) |
 | JDK | 25 | Ambiente | .github/workflows/verify.yml | [API](https://docs.oracle.com/en/java/javase/25/) | [Release](https://openjdk.org/projects/jdk/25/) |
+| GitHub REST API | 2022-11-28 | Consulta ao PR que introduziu o commit de produção | scripts/merged_release.py | [API](https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28#list-pull-requests-associated-with-a-commit) | [Release](https://docs.github.com/en/rest/about-the-rest-api/api-versions) |
 | nginx | 1.28 | Ambiente | compose.yaml | [API](https://nginx.org/en/docs/) | [Release](https://nginx.org/en/CHANGES-1.28) |

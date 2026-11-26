@@ -224,9 +224,57 @@ jobs:
       - uses: actions/download-artifact@v4
         with: {name: e2e-evidence}
       - run: python scripts/catalog.py
+      - run: python scripts/test_merged_release.py
+      - run: python scripts/test_upload_release.py
+      - run: python scripts/test_deploy_release.py
       - uses: actions/download-artifact@v4
         with: {name: upgrade-evidence, path: reports}
       - run: python scripts/acceptance.py
       - uses: actions/upload-artifact@v4
         if: always()
         with: {name: acceptance, path: reports/acceptance.json}
+
+  merged-release:
+    name: Identify merged release
+    needs: verify
+    if: github.event_name == 'push' && github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      merged: ${{ steps.release.outputs.merged }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: python scripts/merged_release.py
+
+  deploy:
+    name: Deploy ERP
+    needs: merged-release
+    if: needs.merged-release.outputs.merged == 'true'
+    runs-on: ubuntu-24.04
+    environment: production
+    concurrency:
+      group: erp-production
+      queue: max
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/download-artifact@v4
+        with: {name: api, path: artifacts/api}
+      - uses: actions/download-artifact@v4
+        with: {name: web, path: artifacts/web}
+      - name: Publish verified artifacts
+        env:
+          ERP_DEPLOY_HOST: ${{ vars.ERP_DEPLOY_HOST }}
+          ERP_DEPLOY_USER: ${{ vars.ERP_DEPLOY_USER }}
+          ERP_DEPLOY_SSH_KEY: ${{ secrets.ERP_DEPLOY_SSH_KEY }}
+          ERP_DEPLOY_KNOWN_HOSTS: ${{ secrets.ERP_DEPLOY_KNOWN_HOSTS }}
+        run: python scripts/upload_release.py

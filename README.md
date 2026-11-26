@@ -27,6 +27,8 @@ O check `Coverage >= 90%` compara as linhas executáveis alteradas no Kotlin e n
 
 A proteção da `master` exige os dois checks unitários, a cobertura, a verificação final e a análise automática do [projeto no SonarQube Cloud](https://sonarcloud.io/project/overview?id=JoaoCareta_erp-industrial). O relatório numérico de cobertura fica no artefato `coverage` do GitHub Actions.
 
+Após o merge de um PR na `master`, a pipeline verifica o commit integrado e publica os artefatos aprovados na hospedagem da Mundo Eduk. O primeiro corte para MariaDB e a configuração do ambiente `production` têm um [roteiro de publicação](docs/deploy.md).
+
 ## Grupos, unidades e cargos
 
 Cada conta pertence a um grupo. Após o login, o ERP abre a única fábrica liberada ou solicita a escolha entre as unidades autorizadas. A última seleção é lembrada por conta neste navegador e validada novamente na entrada. O cabeçalho identifica grupo e unidade. Na tela Equipe, um único setor carrega automaticamente. Quando há vários, a pessoa escolhe o setor.
