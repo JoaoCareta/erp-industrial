@@ -160,7 +160,7 @@ export function Engineering({ api, run, canEdit, canPublish }: Props) {
                 }
               />
             </label>
-            <button>Salvar cadastro</button>
+            <button type="submit">Salvar cadastro</button>
             <button type="button" onClick={reset}>
               Limpar campos
             </button>
@@ -485,8 +485,8 @@ function Sheets({
               >
                 +
               </button>
-              <button value="save">Salvar rascunho</button>
-              {canPublish && <button value="publish">Publicar ficha</button>}
+              <button type="submit" value="save">Salvar rascunho</button>
+              {canPublish && <button type="submit" value="publish">Publicar ficha</button>}
             </form>
           )}
         </>
