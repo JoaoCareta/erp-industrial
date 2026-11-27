@@ -233,6 +233,8 @@ jobs:
       - run: python scripts/test_merged_release.py
       - run: python scripts/test_upload_release.py
       - run: python scripts/test_deploy_release.py
+      - run: python scripts/test_public_release.py
+      - run: python scripts/test_pull_release.py
       - uses: actions/download-artifact@v4
         with: {name: upgrade-evidence, path: reports}
       - run: python scripts/acceptance.py
@@ -277,10 +279,19 @@ jobs:
         with: {name: api, path: artifacts/api}
       - uses: actions/download-artifact@v4
         with: {name: web, path: artifacts/web}
-      - name: Publish verified artifacts
+      - name: Package verified API and frontend
+        run: |
+          mkdir package
+          python -c "from pathlib import Path; from scripts.upload_release import build_bundle; build_bundle(Path('artifacts/api'), Path('artifacts/web'), Path('package'))"
+      - name: Publish production package to Actions
+        id: package
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-${{ github.run_attempt }}
+          path: package/release.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - name: Confirm activation and verify public assets
         env:
-          ERP_DEPLOY_HOST: ${{ vars.ERP_DEPLOY_HOST }}
-          ERP_DEPLOY_USER: ${{ vars.ERP_DEPLOY_USER }}
-          ERP_DEPLOY_SSH_KEY: ${{ secrets.ERP_DEPLOY_SSH_KEY }}
-          ERP_DEPLOY_KNOWN_HOSTS: ${{ secrets.ERP_DEPLOY_KNOWN_HOSTS }}
-        run: python scripts/upload_release.py
+          ERP_ARTIFACT_ID: ${{ steps.package.outputs.artifact-id }}
+        run: python scripts/public_release.py artifacts/web

@@ -94,26 +94,30 @@ def publish_assets(source, web):
 
 
 def fetch(url):
-    request = Request(url + "?erp_check=" + uuid4().hex, headers={"Cache-Control": "no-cache"})
+    request = Request(url + "?erp_check=" + uuid4().hex, headers={
+        "Cache-Control": "no-cache",
+        "User-Agent": "ERP-Industrial-Deployment/1.0 (+https://github.com/JoaoCareta/erp-industrial)",
+    })
     with urlopen(request, timeout=5) as response:
         return response.read()
 
 
-def wait_ready(expected_index=None):
+def wait_ready(web, expected_index=None):
     deadline = time.monotonic() + 120
     while True:
         try:
-            migrations = json.loads(fetch(ORIGIN + "/api/ready"))["migrations"]
+            migrations = json.loads(fetch("http://127.0.0.1:38080/api/ready"))["migrations"]
             if type(migrations) is not int or migrations < 1:
                 raise ValueError("The public API has not confirmed its migrations.")
-            if json.loads(fetch(ISSUER + "/.well-known/openid-configuration"))["issuer"] != ISSUER:
+            discovery = "http://127.0.0.1:38081/auth/realms/industrial/.well-known/openid-configuration"
+            if json.loads(fetch(discovery))["issuer"] != ISSUER:
                 raise ValueError("Unexpected public OIDC issuer.")
-            if expected_index is not None and fetch(ORIGIN + "/") != expected_index:
-                raise ValueError("The public frontend is serving a different index.")
+            if expected_index is not None and (web / "index.html").read_bytes() != expected_index:
+                raise ValueError("Apache has a different index.")
             return
         except (OSError, HTTPException, ValueError, KeyError, TypeError) as error:
             if time.monotonic() >= deadline:
-                raise RuntimeError("Public release checks failed: " + str(error)) from error
+                raise RuntimeError("Origin release checks failed: " + str(error)) from error
             time.sleep(2)
 
 
@@ -144,7 +148,7 @@ def promote(sha, run_number, bundle, config, store):
         atomic_write(web / "index.html", previous_index)
         switch_lib(link, Path(previous["previous_lib"]))
         restart_api()
-        wait_ready(previous_index)
+        wait_ready(web, previous_index)
         pending.unlink()
 
     if pending.exists():
@@ -181,9 +185,9 @@ def promote(sha, run_number, bundle, config, store):
     try:
         switch_lib(link, directory / "api/lib")
         restart_api()
-        wait_ready()
+        wait_ready(web)
         atomic_write(web / "index.html", index)
-        wait_ready(index)
+        wait_ready(web, index)
         atomic_write(active, json.dumps(release).encode(), mode=0o600)
     except Exception:
         restore(attempt)

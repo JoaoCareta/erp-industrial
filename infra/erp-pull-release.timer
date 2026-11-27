@@ -1,0 +1,10 @@
+[Unit]
+Description=Consultar deploys aprovados do ERP
+
+[Timer]
+OnStartupSec=20s
+OnUnitInactiveSec=30s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
