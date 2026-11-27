@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 import shutil
 import tempfile
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 from zipfile import ZipFile
 
@@ -25,6 +25,10 @@ class SecureRedirect(HTTPRedirectHandler):
 
 
 def api(path, token):
+    if path != "workflows/verify.yml/runs?event=push&branch=master&status=in_progress&per_page=100" and not (
+            re.fullmatch(r"artifacts/[1-9][0-9]*/zip", path)
+            or re.fullmatch(r"runs/[1-9][0-9]*/artifacts\?per_page=100", path)):
+        raise ValueError("Unexpected Actions API route.")
     request = Request(API + path, headers={"User-Agent": "ERP-Industrial-Deployment/1.0"})
     # The signed artifact redirect goes to storage. Only GitHub receives this credential.
     request.add_unredirected_header("Authorization", "Bearer " + token)
@@ -47,7 +51,8 @@ def install(run, artifact, token, config):
     with tempfile.TemporaryDirectory(dir=str(STORE)) as tmp:
         archive = Path(tmp) / "artifact.zip"
         digest = hashlib.sha256()
-        with api("artifacts/{}/zip".format(int(artifact["id"])), token) as reply, archive.open("wb") as output:
+        artifact_id = quote(str(int(artifact["id"])), safe="")
+        with api("artifacts/{}/zip".format(artifact_id), token) as reply, archive.open("wb") as output:
             for chunk in iter(lambda: reply.read(1024 * 1024), b""):
                 output.write(chunk)
                 digest.update(chunk)
@@ -68,7 +73,8 @@ def poll():
     for run in sorted(runs, key=lambda r: r["run_number"]):
         if not eligible(run, active["run"]):
             continue
-        with api("runs/{}/artifacts?per_page=100".format(int(run["id"])), token) as reply:
+        run_id = quote(str(int(run["id"])), safe="")
+        with api("runs/{}/artifacts?per_page=100".format(run_id), token) as reply:
             artifact = select_artifact(json.load(reply)["artifacts"], run["run_attempt"])
         if artifact is None:
             continue

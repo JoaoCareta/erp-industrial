@@ -294,4 +294,4 @@ jobs:
       - name: Confirm activation and verify public assets
         env:
           ERP_ARTIFACT_ID: ${{ steps.package.outputs.artifact-id }}
-        run: python scripts/public_release.py artifacts/web
+        run: python scripts/public_release.py

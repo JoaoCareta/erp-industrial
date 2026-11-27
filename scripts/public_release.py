@@ -1,7 +1,6 @@
 """Confirm that clients can reach the ERP and receive the verified frontend assets."""
 import json
 import os
-import sys
 import time
 from html.parser import HTMLParser
 from pathlib import Path
@@ -43,8 +42,8 @@ def verify(root):
 
 if __name__ == "__main__":
     if os.environ.get("ERP_ARTIFACT_ID"):
-        expected = dict(sha=os.environ["GITHUB_SHA"], run=int(os.environ["GITHUB_RUN_NUMBER"]),
-                        attempt=int(os.environ["GITHUB_RUN_ATTEMPT"]), artifact=int(os.environ["ERP_ARTIFACT_ID"]))
+        expected = {"sha": os.environ["GITHUB_SHA"], "run": int(os.environ["GITHUB_RUN_NUMBER"]),
+                    "attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]), "artifact": int(os.environ["ERP_ARTIFACT_ID"])}
         deadline = time.monotonic() + 600
         while time.monotonic() < deadline:
             try:
@@ -55,4 +54,4 @@ if __name__ == "__main__":
             time.sleep(10)
         else:
             raise SystemExit("Production did not acknowledge this SHA and artifact within ten minutes.")
-    verify(Path(sys.argv[1]))
+    verify(Path("artifacts/web"))
