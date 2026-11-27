@@ -1,4 +1,4 @@
-import { encodePending, readPending } from "./pending";
+import { encodePending, savePending, readPending } from "./pending";
 import React, { useRef, useState } from "react";
 import type { RequestApi } from "../Workspace";
 import { ApiError } from "../ApiError";
@@ -22,7 +22,7 @@ export function FinishedKits({ api, path, storageKey, canReceive }: {
   async function receive() {
     if (sending.current) return;
     const intent = batch || { id: crypto.randomUUID(), quantity: Number(amount) };
-    sessionStorage.setItem(storageKey, encodePending(intent));
+    savePending(storageKey, encodePending(intent));
     setBatch(intent);
     sending.current = true;
     setBusy(true);

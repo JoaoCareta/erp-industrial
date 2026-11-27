@@ -1,4 +1,4 @@
-import { encodePending, readPending, scopeId } from "./pending";
+import { encodePending, savePending, readPending, scopeId } from "./pending";
 import React, { useRef, useState } from "react";
 import type { RequestApi } from "../Workspace";
 import { ApiError } from "../ApiError";
@@ -74,7 +74,7 @@ function NewOrder({ api, storageKey, back, open }: {
     notify("");
     const encoded = encodePending(intent);
     // A lost response must keep the original order ID and payload across navigation and reload.
-    sessionStorage.setItem(storageKey, encoded);
+    savePending(storageKey, encoded);
     setPending(intent);
     const forget = () => {
       if (sessionStorage.getItem(storageKey) === encoded) sessionStorage.removeItem(storageKey);

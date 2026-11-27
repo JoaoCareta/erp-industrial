@@ -1,4 +1,4 @@
-import { encodePending, readPending, scopeId } from "./pending";
+import { encodePending, savePending, readPending, scopeId } from "./pending";
 import React, { useState } from "react";
 import type { RequestApi } from "../Workspace";
 import { useRead } from "../useRead";
@@ -43,12 +43,12 @@ export function Kanban({ api, accountId, plantId, canReport, initialOrder, openO
   const [stage, filterStage] = useState("");
   const [pending, setPending] = useState<ReportIntent | null>(() => readPending<ReportIntent>(key));
   function remember(intent: ReportIntent) {
-    sessionStorage.setItem(key, encodePending(intent));
+    savePending(key, encodePending(intent));
     setPending(intent);
   }
   function forget(intent: ReportIntent) {
     // A reply from an old screen may arrive while a new command is pending on this terminal.
-    if (JSON.stringify(readPending(key)) === JSON.stringify(intent)) {
+    if (sessionStorage.getItem(key) === encodePending(intent)) {
       sessionStorage.removeItem(key);
       setPending(null);
     }
