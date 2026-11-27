@@ -14,7 +14,9 @@ O cliente confirmou as decisões abaixo, conforme retorno repassado pelo interlo
 | Abrangência | O piloto abrange a fábrica toda. O corte a laser ilustrado na tela de acesso é um exemplo de posto. A seleção de setor deve respeitar as permissões individuais. |
 | Interface | O cliente escolheu a proposta [Estação de turno](ui/02-estacao-de-turno.pdf) como referência visual para acesso, Kanban, ordem de produção e dashboard do turno. Os nomes, números e papéis ilustrados são exemplos. |
 
-**Apontamento de produção.** No áudio das 19h52 de 26/11, o cliente atribuiu a liberação das ordens à direção. Falta identificar quem pode registrar as quantidades produzidas. O fluxo pode ser desenvolvido e testado com contas sintéticas. A concessão na fábrica depende dessa resposta.
+**Autorização de cadastros e liberações.** Decisão confirmada pelo interlocutor do projeto em 27/11/2026, na resposta ao item 1 sobre produção. O administrador tem acesso completo no seu escopo. Para as demais contas, o cadastro de acesso determina quais operações cada pessoa pode executar. Por exemplo, um líder pode receber permissão de liberar OS na unidade onde atua. Criar a OS, liberá-la, apontar peças, conferir kits e corrigir uma conferência são ações distintas. A administração atribui as permissões aplicáveis no cadastro. Na homologação, usar duas contas de líder na mesma unidade e conceder liberação a apenas uma. Verificar o botão e a autorização na API para ambas.
+
+**Conferência, divergência e encerramento.** Em 27/11/2026, o interlocutor do projeto confirmou que a conferência dá entrada nos acabados. Em uma OS de 150 kits, conferir 30 credita 30 e deixa 120 por conferir. O sistema deve informar divergências de contagem. Ao encerrar a OS antecipadamente, a reserva de matéria-prima ainda não consumida volta a ficar disponível. O consumo já apontado permanece no extrato. [Tratamento proposto para divergências](plano-paridade-industrial.md#correção-da-conferência)
 
 ## Conferência por funcionalidade
 

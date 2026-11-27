@@ -3,6 +3,14 @@ import { Engineering } from "./engineering/Engineering";
 import { Stock } from "./stock/Stock";
 import { Production } from "./production/Production";
 import { Kanban } from "./production/Kanban";
+import { OperationalAccess } from "./OperationalAccess";
+import { Dashboard } from "./dashboard/Dashboard";
+import { Costs } from "./costs/Costs";
+import { Planning } from "./planning/Planning";
+import { Outsourcing } from "./outsourcing/Outsourcing";
+import { Purchasing } from "./purchasing/Purchasing";
+import { Sales } from "./sales/Sales";
+import { scoped } from "./EntryForm";
 import { ApiError } from "./ApiError";
 
 export type RequestApi = <T>(
@@ -149,6 +157,13 @@ function PlantWorkspace({
 }) {
   const pages = [
     "Equipe",
+    ...(plant.actions.includes("access.operations") ? ["Permissões"] : []),
+    ...(plant.actions.includes("dashboard.read") ? ["Painel do turno"] : []),
+    ...(plant.actions.includes("costs.read") ? ["Custos e preços"] : []),
+    ...(plant.actions.includes("planning.read") ? ["Planejamento"] : []),
+    ...(plant.actions.includes("outsourcing.read") ? ["Terceiros"] : []),
+    ...(plant.actions.includes("purchases.read") ? ["Compras"] : []),
+    ...(plant.actions.includes("sales.read") ? ["Vendas"] : []),
     ...(plant.actions.includes("engineering.read") ? ["Engenharia"] : []),
     ...(plant.actions.includes("stock.read") ? ["Estoque"] : []),
     ...(plant.actions.includes("production.read") ? ["Kanban", "Ordens de produção"] : []),
@@ -191,11 +206,26 @@ function PlantWorkspace({
         {page !== "Ordens de produção" && page !== "Kanban" && <h1>{page}</h1>}
         {page === "Equipe" ? (
           <section aria-label="Consulta de equipe"><Team sectors={plant.sectors} api={api} /></section>
+        ) : page === "Permissões" ? (
+          <OperationalAccess api={api} scope={scoped(accountId,plant.id)}/>
+        ) : page === "Painel do turno" ? (
+          <Dashboard api={api} actions={plant.actions} open={show}/>
+        ) : page === "Custos e preços" ? (
+          <Costs api={api}/>
+        ) : page === "Planejamento" ? (
+          <Planning api={api} scope={scoped(accountId,plant.id)} canWrite={plant.actions.includes("planning.write")} canStock={plant.actions.includes("stock.read")} />
+        ) : page === "Terceiros" ? (
+          <Outsourcing api={api} scope={scoped(accountId,plant.id)} canWrite={plant.actions.includes("outsourcing.write")} />
+        ) : page === "Compras" ? (
+          <Purchasing api={api} scope={scoped(accountId,plant.id)} canWrite={plant.actions.includes("purchases.write")} />
+        ) : page === "Vendas" ? (
+          <Sales api={api} scope={scoped(accountId,plant.id)} canSell={plant.actions.includes("sales.write")} canOpen={plant.actions.includes("stock.write")} />
         ) : page === "Estoque" ? (
           <Stock api={api} canWrite={plant.actions.includes("stock.write")} accountId={accountId} plantId={plant.id} />
         ) : page === "Ordens de produção" ? (
           <Production api={api} accountId={accountId} plantId={plant.id}
             initialOrder={orderTarget} openBoard={id => show("Kanban", id)}
+            canCorrect={plant.actions.includes("production.correct")} canClose={plant.actions.includes("production.close")}
             canCreate={plant.actions.includes("production.create")}
             canReceive={plant.actions.includes("production.receive")} canRelease={plant.actions.includes("production.release")} />
         ) : page === "Kanban" ? (

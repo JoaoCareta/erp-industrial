@@ -75,6 +75,12 @@ test("liberar a Vila Natalina reserva 30 de 100 placas brancas e mantém 70 disp
   const { productId, stock } = await prepareVillage(page.request, authorization);
   const button = (name: string) => page.getByRole("button", { name, exact: true });
   await page.emulateMedia({ reducedMotion: "no-preference" });
+  await button("Engenharia").click();
+  await page.getByRole("combobox",{name:"Produto pai",exact:true}).selectOption(productId);
+  await page.getByText("Planejamento laser",{exact:true}).click();
+  await page.getByLabel("Quantidade de kits").fill("150");
+  const laserRow=page.getByRole("row").filter({has:page.getByText("Casinha Branca",{exact:true})}).filter({has:page.getByRole("cell",{name:"300",exact:true})});
+  for(const value of ["4","228"]) await expect(laserRow.getByRole("cell",{name:value,exact:true})).toBeVisible();
   await button("Ordens de produção").click();
   await button("Nova OS").click();
   await page.getByRole("combobox", { name: "Produto", exact: true }).selectOption(productId);
@@ -88,6 +94,26 @@ test("liberar a Vila Natalina reserva 30 de 100 placas brancas e mantém 70 disp
   expect(draft).toMatchObject({ status: "draft", quantity: 150, version: 1 });
   await expect(page.getByRole("heading", { name: productName, exact: true })).toBeVisible();
   await expect(page.locator(".order-detail")).not.toHaveCSS("animation-name", "none");
+  // Publish an unmistakably different recipe, then print the already created order.
+  const productPath = plant + "/products/" + productId;
+  const first = await (await page.request.get(productPath + "/versions/1", { headers })).json();
+  const v2 = await page.request.post(productPath + "/drafts", { headers, data: {
+    ...first.sheet, pieces: first.sheet.pieces.map((piece: object) => ({ ...piece, steps: ["Roteiro exclusivo V2"] })),
+  } });
+  expect(v2.ok()).toBe(true);
+  const secondDraft = await v2.json();
+  const published = await page.request.post(productPath + "/drafts/" + secondDraft.id + "/publication",
+    { headers, data: { revision: secondDraft.revision } });
+  expect(await published.json()).toBe(2);
+  await page.emulateMedia({media:"print"});
+  await expect(page.getByText("Ficha técnica v1",{exact:true})).toBeVisible();
+  await expect(page.locator(".print-routing tbody tr").first().getByText(/Corte Laser/)).toBeVisible();
+  await expect(page.getByText("Roteiro exclusivo V2")).toHaveCount(0);
+  await expect(page.locator(".print-materials")).toContainText("30 PL");
+  await expect(button("Imprimir OS")).toBeHidden();
+  const pdf = await page.pdf({format:"A4",path:resolve("../reports/os-v1.pdf")});
+  expect(pdf.subarray(0,5).toString()).toBe("%PDF-");
+  await page.emulateMedia({media:"screen"});
   const whiteBefore = await page.request.get(stock[0].path, { headers });
   expect(await whiteBefore.json()).toMatchObject({ physical: "100", reserved: "0", available: "100" });
   await button("Liberar OS").click();
@@ -218,4 +244,28 @@ test("conferir 30 kits da Vila dá entrada parcial e mantém a OS aberta", async
   await expect(page.getByRole("status")).toContainText("Entrada confirmada de 30 kits");
   await expect(page.getByText("Liberada",{exact:true})).toBeVisible();
   expect(await (await page.request.get(path + "/finished-receipts",{headers})).json()).toEqual({received:30,remaining:120,stock:30});
+  const button=(name:string)=>page.getByRole("button",{name,exact:true});
+  await button("Vendas").click();
+  await page.getByRole("combobox",{name:"Produto",exact:true}).selectOption(productId);
+  await page.getByLabel("Data",{exact:true}).fill("2026-11-27");
+  await page.getByLabel("Canal",{exact:true}).fill("Loja");
+  await page.getByLabel("Quantidade",{exact:true}).fill("10");
+  await page.getByLabel("Preço unitário (R$)",{exact:true}).fill("12.50");
+  await button("Registrar venda").click();
+  await expect(page.getByRole("listitem").filter({hasText:"Loja"}).last()).toContainText("125,00");
+  await button("Ordens de produção").click();
+  await page.getByRole("button",{name:new RegExp("OS-" + String(order.number).padStart(4,"0"))}).click();
+  await page.getByText("Corrigir conferência",{exact:true}).click();
+  await page.getByRole("combobox",{name:"Conferência original",exact:true}).selectOption({index:1});
+  await page.getByLabel("Quantidade recontada").fill("28");
+  await page.getByLabel("Motivo da correção").fill("Conferência física");
+  await expect(page.getByText(/Saldo projetado: 18/)).toBeVisible();
+  await button("Confirmar correção").click();
+  await expect(page.getByText("18 kits",{exact:true})).toBeVisible();
+  await page.getByText("Encerrar OS",{exact:true}).click();
+  await page.getByLabel("Motivo do encerramento").fill("Fim do lote");
+  await button("Confirmar encerramento").click();
+  await expect(page.getByText("Encerrada",{exact:true}).first()).toBeVisible();
+  expect(await (await page.request.get(path+"/finished-receipts",{headers})).json()).toEqual({received:28,remaining:122,stock:18});
+
 });

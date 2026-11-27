@@ -8,6 +8,18 @@ from pathlib import Path
 from xml.etree import ElementTree as ET
 
 MODULES = {
+    "backend/vendas": "src/main/kotlin/erp/sales/",
+    "frontend/vendas": "frontend/src/sales/",
+    "backend/compras": "src/main/kotlin/erp/purchasing/",
+    "frontend/compras": "frontend/src/purchasing/",
+    "backend/terceiros": "src/main/kotlin/erp/outsourcing/",
+    "frontend/terceiros": "frontend/src/outsourcing/",
+    "backend/planejamento": "src/main/kotlin/erp/planning/",
+    "frontend/planejamento": "frontend/src/planning/",
+    "backend/custos": "src/main/kotlin/erp/costs/",
+    "frontend/custos": "frontend/src/costs/",
+    "backend/painel": "src/main/kotlin/erp/dashboard/",
+    "frontend/painel": "frontend/src/dashboard/",
     "backend/fundacao": "src/main/kotlin/erp/",
     "backend/acesso": "src/main/kotlin/erp/access/",
     "backend/engenharia": "src/main/kotlin/erp/engineering/",
@@ -48,7 +60,7 @@ def changes(base):
     if not base:
         return None
     diff = subprocess.check_output(["git", "diff", "--no-ext-diff", "--no-renames", "-U0",
-                                    base + "...HEAD", "--", *MODULES.values()], text=True, encoding="utf8")
+                                    "--merge-base", base, "--", *MODULES.values()], text=True, encoding="utf8")
     selected = defaultdict(set)
     for line in diff.splitlines():
         if line.startswith("+++ b/"):
@@ -56,6 +68,11 @@ def changes(base):
         elif line.startswith("@@"):
             start, count = re.search(r"\+(\d+)(?:,(\d+))? @@", line).groups()
             selected[path].update(range(int(start), int(start) + int(count or 1)))
+    untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard", "--", *MODULES.values()],
+                                        text=True, encoding="utf8")
+    for path in untracked.splitlines():
+        if path.endswith((".kt", ".ts", ".tsx")):
+            selected[path].update(range(1, len(Path(path).read_text(encoding="utf8").splitlines()) + 1))
     return selected
 
 

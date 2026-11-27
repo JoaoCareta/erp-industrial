@@ -189,3 +189,25 @@
 @media (prefers-reduced-motion: no-preference) {
   .finished-kits progress::-webkit-progress-value { transition: width 240ms var(--motion-enter); }
 }
+
+.print-materials, .print-routing { display: none; }
+.industrial-table { overflow-x: auto; }
+.industrial-table th, .industrial-table td { padding: .4rem .75rem; text-align: left; }
+@media print {
+  body:has(.order-detail) { background: white; color: black; }
+  .order-detail .no-print, body:has(.order-detail) .station-header, .order-detail button, .order-detail .finished-kits,
+  .order-detail .order-materials, .order-detail .order-stage > :not(.order-log) { display: none; }
+  .order-detail .print-materials, .order-detail .order-columns { display: block; }
+  .order-detail .order-pieces li, .order-detail .print-materials li { break-inside: avoid; }
+  .order-detail, .order-detail section { box-shadow: none; overflow: visible; }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  .order-detail .order-pieces { display: none; }
+  .order-detail .print-routing { display: table; width: 100%; border-collapse: collapse; margin-top: 5mm; font-size: 10pt; }
+  .print-routing thead { display: table-header-group; }
+  .print-routing tr { break-inside: avoid; }
+  .print-routing th, .print-routing td { padding: 2mm; text-align: left; border-bottom: 1px solid #777; color: #111; }
+  .order-detail .order-number, .order-detail .order-badge, .order-detail .order-subtitle { color: #222; }
+}

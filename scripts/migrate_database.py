@@ -110,7 +110,19 @@ def require_versions(cursor, supported):
 
 
 def require_empty_stock_target(sql):
-    versions = require_versions(sql, {"1", "2", "5", "7", "9", "10", "12", "13", "15"})
+    versions = require_versions(sql, {"1", "2", "5", "7", "9", "10", "12", "13", "15", "17", "19", "21", "23", "25", "27", "29"})
+    if "29" in versions:
+        sql.execute("select 1 from operational_grant limit 1")
+        if sql.fetchone() is not None:
+            raise ValueError("Destination already contains operational grants. Use a fresh target for the transfer.")
+    if "25" in versions:
+        sql.execute("select 1 from piece_account limit 1")
+        if sql.fetchone() is not None:
+            raise ValueError("Destination already contains piece stock. Use a fresh target for the transfer.")
+    if "17" in versions:
+        sql.execute("select 1 from finished_stock limit 1")
+        if sql.fetchone() is not None:
+            raise ValueError("Destination already contains finished stock. Use a fresh target for the transfer.")
     if "7" in versions:
         # The PostgreSQL source predates inventory. Any stock account on the target
         # signals that local operations have already started after cutover.

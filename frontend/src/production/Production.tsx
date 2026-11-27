@@ -6,6 +6,8 @@ import { displayQuantity } from "../quantity";
 import { useRead } from "../useRead";
 import { ReadError, MaterialTotals } from "./WorkDetails";
 import { orderNumber, dateFormat, quantityFormat, executionPath, type Execution } from "./execution";
+import { Recounts } from "./Recounts";
+import { EntryForm } from "../EntryForm";
 import { FinishedKits } from "./FinishedKits";
 import "./production.css";
 
@@ -14,35 +16,40 @@ type Create = { productId: string; version: number; quantity: number };
 type Intent = { id: string; data: Create; productName: string };
 type Order = Create & {
   id: string; number: number; productCode: string; productName: string;
-  status: "draft" | "released"; createdAt: string; releasedAt: string | null;
+  status: "draft" | "released" | "closed"; closureReason?:string; closedAt?:string; createdAt: string; releasedAt: string | null;
   materials: { materialId: string; name: string; unitCode: string; perKit: string; required: string }[];
   pieces: { name: string; perKit: number; steps: string[] }[];
 };
 const ordersPath = "production-orders";
 const numberOf = (order: Order) => orderNumber(order.number);
-const stage = { draft: "Rascunho", released: "Liberada" };
+const stage = { draft: "Rascunho", released: "Liberada", closed:"Encerrada" };
 
-export function Production({ api, accountId, plantId, canCreate, canRelease, canReceive, initialOrder, openBoard }: {
+export function Production({ api, accountId, plantId, canCreate, canRelease, canReceive, canCorrect, canClose, initialOrder, openBoard }: {
   api: RequestApi; accountId: string; plantId: string; canCreate: boolean; canRelease: boolean;
-  canReceive: boolean; initialOrder: string; openBoard: (id: string) => void;
+  canCorrect?:boolean; canClose?:boolean; canReceive: boolean; initialOrder: string; openBoard: (id: string) => void;
 }) {
   const storageKey = "erp.production.create." + JSON.stringify([scopeId(accountId), scopeId(plantId)]);
   const [view, navigate] = useState(initialOrder || "list");
   const back = () => navigate("list");
-  if (view === "list") return <OrderList api={api} open={navigate} canCreate={canCreate}
+  if (view === "list") return <OrderList api={api} open={navigate} canReview={!!canCorrect} canCreate={canCreate}
     pending={sessionStorage.getItem(storageKey) !== null} />;
   if (view === "new") return <NewOrder api={api} storageKey={storageKey} back={back} open={navigate} />;
-  return <OrderDetail key={view} storageKey={JSON.stringify(["finished", scopeId(accountId), scopeId(plantId), scopeId(view)])} canReceive={canReceive} api={api} id={view} back={back} canRelease={canRelease} openBoard={openBoard} />;
+  return <OrderDetail key={view} storageKey={JSON.stringify(["finished", scopeId(accountId), scopeId(plantId), scopeId(view)])} canCorrect={canCorrect} canClose={canClose} canReceive={canReceive} api={api} id={view} back={back} canRelease={canRelease} openBoard={openBoard} />;
 }
 
-function OrderList({ api, open, canCreate, pending }: {
-  api: RequestApi; open: (id: string) => void; canCreate: boolean; pending: boolean;
+function OrderList({ api, open, canCreate, pending, canReview }: {
+  api: RequestApi; open: (id: string) => void; canCreate: boolean; pending: boolean; canReview:boolean;
 }) {
   const list = useRead<Order[]>(api, ordersPath);
+  const corrections=useRead<{id:string;orderId:string;state:string;reason:string}[]>(api,canReview ? ordersPath+"/corrections" : null);
   return <div className="order-index">
     <div className="order-title-row"><h1>Ordens de produção</h1>
       {canCreate && <button className="order-action" type="button" onClick={() => open("new")}>
         {pending ? "Retomar criação da OS" : "Nova OS"}</button>}</div>
+    {canReview && (corrections.value==="error" ? <ReadError retry={corrections.reload}/> :
+      corrections.value?.some(c=>c.state==="pending") && <section><h2>Divergências abertas na unidade</h2>
+        <ul>{corrections.value.filter(c=>c.state==="pending").map(c=><li key={c.id}>{c.reason}
+          <button onClick={()=>open(c.orderId)}>Conferir divergência</button></li>)}</ul></section>)}
     {list.value === "error" ? <ReadError retry={list.reload} /> :
       list.value === null ? <p role="status">Carregando ordens…</p> :
       list.value.length === 0 ? <p className="order-empty">Nenhuma ordem de produção nesta unidade.</p> :
@@ -144,13 +151,15 @@ function CreateForm({ api, save }: { api: RequestApi; save: (data: Create, produ
   </section>;
 }
 
-function OrderDetail({ api, id, back, canRelease, canReceive, storageKey, openBoard }: {
-  api: RequestApi; id: string; back: () => void; canRelease: boolean; canReceive: boolean; storageKey: string; openBoard: (id: string) => void;
+function OrderDetail({ api, id, back, canRelease, canReceive, canCorrect, canClose, storageKey, openBoard }: {
+  api: RequestApi; id: string; back: () => void; canRelease: boolean; canCorrect?:boolean; canClose?:boolean; canReceive: boolean; storageKey: string; openBoard: (id: string) => void;
 }) {
   const path = ordersPath + "/" + encodeURIComponent(id);
   const result = useRead<Order>(api, path);
   const releasedOrder = result.value && result.value !== "error" && result.value.status === "released";
   const progress = useRead<Execution>(api, releasedOrder ? executionPath(id) : null);
+  const [linesRevision,refreshLines]=useState(0);
+  const [receiptRevision,refreshReceipts]=useState(0);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const sending = useRef(false);
@@ -176,10 +185,12 @@ function OrderDetail({ api, id, back, canRelease, canReceive, storageKey, openBo
   if (!order || order === "error") return <><Back back={back} />
     {order === "error" ? <ReadError retry={result.reload} /> : <p role="status">Carregando ordem…</p>}</>;
   const released = order.status === "released";
+  const closed=order.status==="closed";
   const hasMaterials = order.materials.length > 0;
   const started = progress.value && progress.value !== "error" && progress.value.reports.length > 0;
   return <div className="order-detail">
     <Back back={back} />
+    <button type="button" onClick={() => window.print()}>Imprimir OS</button>
     <div className="order-summary">
       <div><div className="order-heading"><h1>{order.productName}</h1>
         <span className="order-badge" aria-live="polite" data-status={order.status}>{stage[order.status]}</span></div>
@@ -191,12 +202,12 @@ function OrderDetail({ api, id, back, canRelease, canReceive, storageKey, openBo
     <div className="order-columns">
       <section key={"stage-" + order.status} className="order-stage" aria-label="Liberação da ordem">
         <span className="order-label">{started ? "Execução da ordem" : "Liberação da ordem"}</span>
-        <h2>{started ? "Em andamento" : released ? (hasMaterials ? "Reserva confirmada" : "OS liberada") : "Aguardando liberação"}</h2>
-        <p>{!hasMaterials ? "A liberação desta OS mantém os saldos de estoque." :
+        <h2>{closed ? "OS encerrada" : started ? "Em andamento" : released ? (hasMaterials ? "Reserva confirmada" : "OS liberada") : "Aguardando liberação"}</h2>
+        <p>{closed ? order.closureReason : !hasMaterials ? "A liberação desta OS mantém os saldos de estoque." :
           released ? "Acompanhe os saldos de material e as etapas das peças desta OS." :
           "A liberação reserva os materiais da ficha para este lote e mantém o saldo físico."}</p>
         {released && <button type="button" className="order-action" onClick={() => openBoard(id)}>Acompanhar etapas</button>}
-        {canRelease && !released && (confirm ?
+        {canRelease && order.status==="draft" && (confirm ?
           <div className="order-confirm" role="group" aria-label="Confirmar reserva dos materiais">
             <p>{hasMaterials ? "Confirmar a reserva" : "Confirmar a liberação"} para {quantityFormat.format(order.quantity)} kits?</p>
             {error && <p role="alert">{error}</p>}
@@ -206,6 +217,7 @@ function OrderDetail({ api, id, back, canRelease, canReceive, storageKey, openBo
           </div> : <button type="button" className="order-action" onClick={() => setConfirm(true)}>Liberar OS</button>)}
         <dl className="order-log" aria-label="Histórico da OS">
           <div><dt>Criação</dt><dd><time dateTime={order.createdAt}>{dateFormat.format(new Date(order.createdAt))}</time></dd></div>
+          {order.closedAt && <div><dt>Encerramento</dt><dd>{dateFormat.format(new Date(order.closedAt))}</dd></div>}
           {order.releasedAt && <div><dt>Liberação</dt><dd><time dateTime={order.releasedAt}>{dateFormat.format(new Date(order.releasedAt))}</time></dd></div>}
         </dl>
       </section>
@@ -221,7 +233,18 @@ function OrderDetail({ api, id, back, canRelease, canReceive, storageKey, openBo
             <div><dt>Necessário para a OS</dt>
               <dd>{displayQuantity(m.required, m.unitCode)}</dd></div></dl></div>)}
       </section>
-      {released && <FinishedKits api={api} path={path} canReceive={canReceive} storageKey={storageKey} />}
+      <section className="print-materials"><h2>Materiais da ficha</h2><ul>{order.materials.map(m => <li key={m.materialId}>{m.name} · {displayQuantity(m.required,m.unitCode)} no lote</li>)}</ul></section>
+      {canClose && released && <section className="no-print"><details><summary>Encerrar OS</summary>
+        <p>Confira os kits recebidos e a reserva restante de cada material antes de encerrar.</p>
+        <EntryForm scope={storageKey+".close"} label="Confirmar encerramento" fields={[{name:"reason",label:"Motivo do encerramento",maxLength:500}]}
+        submit={(_,body)=>api(path+"/closure","PUT",body)} done={result.reload}/></details></section>}
+      {canCorrect && (released || closed) && <Recounts key={linesRevision} api={api} scope={storageKey} id={id} refresh={()=>refreshReceipts(n=>n+1)}/>}
+      {(released || closed) && <FinishedKits closed={closed} onReceived={()=>refreshLines(n=>n+1)} key={receiptRevision} api={api} path={path} canReceive={canReceive && released} storageKey={storageKey} />}
+      <table className="print-routing"><thead>
+        <tr><th colSpan={4}>{numberOf(order)} · {order.productName} · Ficha técnica v{order.version}</th></tr>
+        <tr>{["Peça","Por kit","No lote","Roteiro"].map(title=><th key={title}>{title}</th>)}</tr>
+      </thead><tbody>{order.pieces.map((piece,index)=><tr key={index}><th>{piece.name}</th><td>{piece.perKit}</td>
+        <td>{quantityFormat.format(BigInt(piece.perKit)*BigInt(order.quantity))}</td><td>{piece.steps.join(" → ")}</td></tr>)}</tbody></table>
       <section className="order-pieces" aria-label="Peças e roteiro"><h2>Peças e roteiro</h2>
         <ul>{order.pieces.map((piece, index) => <li key={index}>
           <strong>{piece.name}</strong><span>{quantityFormat.format(piece.perKit)} por kit

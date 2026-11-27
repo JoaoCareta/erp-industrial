@@ -1562,6 +1562,1684 @@
           }
         }
       }
+    },
+    "/api/units/{plant}/sales": {
+      "get": {
+        "summary": "Histórico de vendas",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Sale"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/sales/products": {
+      "get": {
+        "summary": "Estoque de acabados por produto",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductBalance"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/sales/{id}": {
+      "put": {
+        "summary": "Registrar venda",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sale"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/sales/products/{product}/opening/{id}": {
+      "put": {
+        "summary": "Inventário inicial",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KitBalance"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpeningInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/closure": {
+      "put": {
+        "summary": "Encerrar a OS e liberar a reserva restante",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reason"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/receipt-lines": {
+      "get": {
+        "summary": "Conferências e revisões",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReceiptLine"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/corrections": {
+      "get": {
+        "summary": "Histórico de divergências",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Correction"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/corrections/{key}": {
+      "put": {
+        "summary": "Registrar recontagem",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Correction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Recount"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/corrections/{key}/resolution": {
+      "put": {
+        "summary": "Conciliar divergência",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Correction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reason"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/purchases": {
+      "get": {
+        "summary": "Listar compras",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Purchase"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/purchases/materials": {
+      "get": {
+        "summary": "Materiais para compras",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StockMaterial"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/purchases/summary": {
+      "get": {
+        "summary": "Resumo de compras",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "supplier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PurchaseSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/purchases/{id}": {
+      "put": {
+        "summary": "Registrar compra e entrada",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Purchase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/purchases/{id}/reversal": {
+      "put": {
+        "summary": "Estornar compra e estoque",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Purchase"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/outsourcing": {
+      "get": {
+        "summary": "Remessas e retornos",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Shipment"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/outsourcing/{key}": {
+      "put": {
+        "summary": "Registrar envio",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shipment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShipmentInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/outsourcing/{key}/returns/{event}": {
+      "put": {
+        "summary": "Registrar retorno e perda",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "event",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Shipment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/planning/products": {
+      "get": {
+        "summary": "Produtos e versões",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionProduct"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/planning/movements": {
+      "get": {
+        "summary": "Histórico de peças",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PartEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/planning/movements/{key}": {
+      "put": {
+        "summary": "Movimentar peças",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PieceMove"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/planning/products/{product}/versions/{version}/capacity": {
+      "get": {
+        "summary": "Capacidade de montagem",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Capacity"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/planning/replenishment": {
+      "get": {
+        "summary": "Simular reposição",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "basis",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "threshold",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Restock"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/costs/products": {
+      "get": {
+        "summary": "Produtos para simulação",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionProduct"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/costs/products/{product}/versions/{version}/stages": {
+      "get": {
+        "summary": "Etapas da versão",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/costs/products/{product}/versions/{version}/simulation": {
+      "post": {
+        "summary": "Simular preço e custos",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Estimate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/dashboard": {
+      "get": {
+        "summary": "Consultar indicadores e suas origens",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "until",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShiftEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/operational-access": {
+      "get": {
+        "summary": "Consultar permissões operacionais",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrantPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/operational-access/{id}/{action}": {
+      "put": {
+        "summary": "Atribuir ou revogar permissão",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrantPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantDecision"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/outsourcing/orders": {
+      "get": {
+        "summary": "OS liberadas e peças para remessa",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DispatchOrder"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Identidade inválida"
+          },
+          "403": {
+            "description": "Sem concessão na fábrica"
+          },
+          "404": {
+            "description": "Registro ausente"
+          },
+          "409": {
+            "description": "Conflito de saldo, chave ou revisão"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1922,6 +3600,11 @@
             "items": {
               "type": "string"
             }
+          },
+          "partId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
           }
         }
       },
@@ -1976,7 +3659,8 @@
             "type": "string",
             "enum": [
               "draft",
-              "released"
+              "released",
+              "closed"
             ]
           },
           "createdAt": {
@@ -1999,6 +3683,15 @@
             "items": {
               "$ref": "#/components/schemas/OrderPiece"
             }
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closureReason": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -2180,6 +3873,12 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/StockMovement"
+            }
+          },
+          "releases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationRelease"
             }
           }
         }
@@ -2409,6 +4108,1001 @@
           "parts",
           "materials"
         ]
+      },
+      "KitBalance": {
+        "type": "object",
+        "properties": {
+          "opening": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "produced": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sold": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "disputed": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "available": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "opening",
+          "produced",
+          "sold",
+          "disputed",
+          "available"
+        ]
+      },
+      "Sale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "productId",
+          "date",
+          "channel",
+          "quantity",
+          "unitPrice",
+          "total"
+        ]
+      },
+      "SaleInput": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unitPrice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productId",
+          "date",
+          "channel",
+          "quantity",
+          "unitPrice"
+        ]
+      },
+      "ProductBalance": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "balance": {
+            "$ref": "#/components/schemas/KitBalance"
+          }
+        },
+        "required": [
+          "productId",
+          "name",
+          "balance"
+        ]
+      },
+      "OpeningInput": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quantity"
+        ]
+      },
+      "Reason": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "ReceiptLine": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "effective": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "id",
+          "quantity",
+          "effective",
+          "revision"
+        ]
+      },
+      "Correction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "prior": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "counted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "state": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string",
+            "nullable": true
+          },
+          "actor": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "orderId",
+          "receiptId",
+          "revision",
+          "prior",
+          "counted",
+          "state",
+          "reason",
+          "actor",
+          "createdAt"
+        ]
+      },
+      "Recount": {
+        "type": "object",
+        "properties": {
+          "receiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "revision": {
+            "type": "integer"
+          },
+          "counted": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "receiptId",
+          "revision",
+          "counted",
+          "reason"
+        ]
+      },
+      "Purchase": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "materialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "supplier": {
+            "type": "string"
+          },
+          "movementId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reversalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reversed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "materialId",
+          "unitId",
+          "quantity",
+          "amount",
+          "date",
+          "supplier",
+          "movementId",
+          "reversalId",
+          "reversed"
+        ]
+      },
+      "PurchaseInput": {
+        "type": "object",
+        "properties": {
+          "materialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "supplier": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "materialId",
+          "unitId",
+          "quantity",
+          "amount",
+          "date",
+          "supplier"
+        ]
+      },
+      "PurchaseSummary": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "average": {
+            "type": "string",
+            "nullable": true
+          },
+          "last": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "quantity",
+          "amount"
+        ]
+      },
+      "ShipmentInput": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pieceIndex": {
+            "type": "integer"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unitPrice": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId",
+          "pieceIndex",
+          "partner",
+          "date",
+          "quantity",
+          "unitPrice"
+        ]
+      },
+      "ReturnInput": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "returned": {
+            "type": "integer"
+          },
+          "lost": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "returned",
+          "lost",
+          "note"
+        ]
+      },
+      "Delivery": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "returned": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lost": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "returned",
+          "lost",
+          "note"
+        ]
+      },
+      "Shipment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pieceIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "piece": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "partner": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "string"
+          },
+          "deliveries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Delivery"
+            }
+          },
+          "remaining": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "serviceOnReturned": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "orderId",
+          "pieceIndex",
+          "piece",
+          "number",
+          "partner",
+          "date",
+          "quantity",
+          "unitPrice",
+          "deliveries",
+          "remaining",
+          "serviceOnReturned"
+        ]
+      },
+      "PieceMove": {
+        "type": "object",
+        "properties": {
+          "partId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "partId",
+          "kind",
+          "quantity",
+          "reason"
+        ]
+      },
+      "PartEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "physical": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reserved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "partId",
+          "kind",
+          "quantity",
+          "physical",
+          "reserved",
+          "reason"
+        ]
+      },
+      "PartCapacity": {
+        "type": "object",
+        "properties": {
+          "partId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "perKit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ready": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reserved": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "free": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "kits": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "partId",
+          "name",
+          "perKit",
+          "ready",
+          "reserved",
+          "free",
+          "kits"
+        ]
+      },
+      "Capacity": {
+        "type": "object",
+        "properties": {
+          "kits": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PartCapacity"
+            }
+          }
+        },
+        "required": [
+          "kits",
+          "parts"
+        ]
+      },
+      "Restock": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "physical": {
+            "type": "string"
+          },
+          "available": {
+            "type": "string"
+          },
+          "consumed": {
+            "type": "string"
+          },
+          "reorder": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "unit",
+          "physical",
+          "available",
+          "consumed",
+          "reorder"
+        ]
+      },
+      "StageRate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "minutes": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "minutes",
+          "rate"
+        ]
+      },
+      "Estimate": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageRate"
+            }
+          },
+          "external": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "commission": {
+            "type": "string"
+          },
+          "tax": {
+            "type": "string"
+          },
+          "margin": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "stages",
+          "external",
+          "channel",
+          "commission",
+          "tax",
+          "margin"
+        ]
+      },
+      "CostLine": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitCost": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "unit"
+        ]
+      },
+      "StageCost": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "minutes": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "minutes",
+          "rate",
+          "amount"
+        ]
+      },
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CostLine"
+            }
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageCost"
+            }
+          },
+          "method": {
+            "type": "string"
+          },
+          "external": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "materialTotal": {
+            "type": "string",
+            "nullable": true
+          },
+          "labor": {
+            "type": "string"
+          },
+          "direct": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "materials",
+          "stages",
+          "method",
+          "external",
+          "channel",
+          "labor"
+        ]
+      },
+      "ShiftEvent": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "label": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "label",
+          "date",
+          "quantity",
+          "unit"
+        ]
+      },
+      "AccountGrant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "actions"
+        ]
+      },
+      "GrantPage": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountGrant"
+            }
+          }
+        },
+        "required": [
+          "actions",
+          "accounts"
+        ]
+      },
+      "GrantDecision": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "enabled",
+          "reason",
+          "requestId"
+        ]
+      },
+      "ReservationRelease": {
+        "type": "object",
+        "required": [
+          "orderId",
+          "quantity"
+        ],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string"
+          }
+        }
+      },
+      "DispatchPiece": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "DispatchOrder": {
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "productName",
+          "pieces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "pieces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DispatchPiece"
+            }
+          }
+        }
       }
     }
   }

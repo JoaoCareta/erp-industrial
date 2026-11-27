@@ -37,6 +37,12 @@ test("consumo no corte mostra a baixa e protege o vínculo com a OS", async () =
   expect(screen.getByText("70 PL")).toBeTruthy();
 });
 
+test("encerramento identifica a OS e a quantidade liberada no extrato",async()=>{
+  portal(path=>path==="stock/materials" ? [material] : {...balance,releases:[{orderId:"os-vila",quantity:"18"}]});
+  await openStock();
+  await screen.findByText("OS os-vila · 18 PL liberadas");
+});
+
 test("entrada decimal e estorno confirmado conservam valor e origem", async () => {
   const addition = { requestId: "addition", kind: "receipt", sourceId: null, quantity: "0.123456", occurredAt: "2026-11-27T14:01:00Z" };
   const after = { ...balance, physical: "100.123456", available: "100.123456", movements: [...balance.movements, addition] };
@@ -95,7 +101,7 @@ test("uma resposta perdida conserva a intenção após recarregar, incluindo o e
   await screen.findByText("-100 PL");
   expect(attempts).toHaveLength(2);
   expect(attempts[1]).toBe(attempts[0]);
-  expect(sessionStorage.length).toBe(0);
+  await waitFor(() => expect(sessionStorage.length).toBe(0));
 });
 
 test("recuperação por extrato reconhece entrada já registrada pelo servidor", async () => {
@@ -118,7 +124,7 @@ test("recuperação por extrato reconhece entrada já registrada pelo servidor",
   await openStock();
   await screen.findByText("Entrada", { exact: true });
   expect(screen.queryByText("Reenviar lançamento")).toBeNull();
-  expect(sessionStorage.length).toBe(0);
+  await waitFor(() => expect(sessionStorage.length).toBe(0));
 });
 
 test("conflito descarta a tentativa recusada e consulta o saldo atualizado", async () => {
@@ -198,7 +204,7 @@ test("uma resposta antiga de abertura preserva o reenvio pendente de uma entrada
   await screen.findByText("12 PL");
   expect(receiptKeys).toHaveLength(2);
   expect(receiptKeys[1]).toBe(receiptKeys[0]);
-  expect(sessionStorage.length).toBe(0);
+  await waitFor(() => expect(sessionStorage.length).toBe(0));
 });
 
 test("erro de consulta permite nova tentativa e trata lista vazia ou material inativo", async () => {
