@@ -17,14 +17,7 @@ Inclua o MariaDB no backup diário e confira uma restauração. O backup anterio
 
 O job **Deploy ERP** recebe os mesmos artefatos usados pela verificação do SHA integrado. A execução de `push` na `master` aguarda **Verificação final** e confirma pela API do GitHub qual PR introduziu o commit antes de acessar o ambiente `production`. Os deploys usam uma fila compartilhada. Uma execução antiga que termine depois de uma publicação mais recente não deve substituir a versão em uso. [Workflow](../.github/workflows/verify.yml)
 
-Cadastre as seguintes variáveis e secrets no ambiente `production` do GitHub Actions.
-
-| Tipo | Nome | Valor esperado |
-|---|---|---|
-| Variável | `ERP_DEPLOY_HOST` | Host SSH da conta, confirmado com a hospedagem |
-| Variável | `ERP_DEPLOY_USER` | Usuário SSH da hospedagem com acesso de publicação |
-| Secret | `ERP_DEPLOY_SSH_KEY` | Chave privada dedicada ao deploy, com a chave pública correspondente autorizada no servidor |
-| Secret | `ERP_DEPLOY_KNOWN_HOSTS` | Entrada completa de `known_hosts` para `[host]:55`, com a chave do servidor conferida por um canal confiável |
+O servidor consulta o workflow por HTTPS com um token fine-grained limitado a este repositório e à permissão Actions de leitura. Guarde-o em `~/.config/erp-industrial/actions-token` com modo 600 e renove-o antes do vencimento. Instale `scripts/pull_release.py` e `scripts/deploy_release.py` em `~/.local/lib/erp-industrial/`. Copie as unidades `infra/erp-pull-release.{service,timer}` para `~/.config/systemd/user/`, execute `systemctl --user daemon-reload` e `systemctl --user enable --now erp-pull-release.timer`.
 
 Na conta SSH, instale `~/.config/erp-industrial/deploy.json` com os caminhos absolutos identificados no primeiro deploy. `api_lib` é o link de bibliotecas que a API em execução usa. `web_root` é o diretório do domínio que contém o `index.html`. `restart_api` contém o executável e seus argumentos para reiniciar somente a API com a configuração da hospedagem. Se o serviço usa o lançador do Gradle, o comando de reinício deve resolver o alvo de `api_lib` e executar o `../bin/erp-industrial` da mesma distribuição. Assim, a lista de JARs acompanha a versão publicada. O formato abaixo usa marcadores que devem ser substituídos pelos valores reais.
 
@@ -36,7 +29,7 @@ Na conta SSH, instale `~/.config/erp-industrial/deploy.json` com os caminhos abs
 }
 ```
 
-O job usa SCP e SSH na porta 55. A conta precisa de Python 3 no servidor, de acesso de escrita às distribuições e ao document root, e de permissão para reiniciar a própria API. Confira o resultado em **Actions → Verificação do ERP → Deploy ERP** e no histórico do ambiente **production**. [Prontidão da API](https://mundoeduk.lufan.com.br/api/ready) · [Emissor OIDC](https://mundoeduk.lufan.com.br/auth/realms/industrial/.well-known/openid-configuration)
+O servidor confere o SHA-256 do arquivo baixado, ativa a distribuição e registra o SHA, a tentativa e o ID do artefato em `/erp-release.json`. O job compara esse recibo com a execução em andamento e verifica a API, o emissor e os arquivos públicos da interface. A conta precisa de Python 3 no servidor, de acesso de escrita às distribuições e ao document root, e de permissão para reiniciar a própria API. Confira o resultado em **Actions → Verificação do ERP → Deploy ERP** e no histórico do ambiente **production**. [Prontidão da API](https://mundoeduk.lufan.com.br/api/ready) · [Emissor OIDC](https://mundoeduk.lufan.com.br/auth/realms/industrial/.well-known/openid-configuration)
 
 Se alguma verificação pública falhar, o instalador restaura a API e o índice anterior da interface. As migrações SQL já aplicadas continuam no MariaDB. Antes de integrar uma alteração de esquema, verifique no ensaio que a versão anterior da API ainda consegue usar o esquema atualizado.
 

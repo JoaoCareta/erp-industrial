@@ -78,7 +78,8 @@ class ReleaseBundleTest(unittest.TestCase):
     @patch("subprocess.run")
     def test_publishes_and_skips_duplicate_and_older_workflows(self, restart, health):
         web, _ = self.deployment()
-        def observe(expected=None):
+        def observe(root, expected=None):
+            self.assertEqual(root, web)
             self.assertEqual((web / "index.html").read_bytes(), expected or b"previous index")
         health.side_effect = observe
         sha = "a" * 40
@@ -143,7 +144,7 @@ class ReleaseBundleTest(unittest.TestCase):
             promote(sha, 24, self.bundle, self.config, self.store)
         self.assertTrue((self.store / "pending.json").exists())
         restored = []
-        health.side_effect = lambda expected=None: restored.append((self.active(), expected))
+        health.side_effect = lambda root, expected=None: restored.append((self.active(), expected))
         promote(sha, 24, self.bundle, self.config, self.store)
         self.assertEqual(restored[0], (previous, b"previous index"))
         self.assertEqual((web / "index.html").read_bytes(), b"new index")
@@ -162,17 +163,23 @@ class ReleaseBundleTest(unittest.TestCase):
         restart.assert_not_called()
 
     @patch("deploy_release.fetch")
-    def test_public_checks_require_migrations_expected_issuer_and_published_index(self, fetch):
+    def test_origin_checks_use_local_services_and_apache_index(self, fetch):
+        web = self.destination
+        (web / "index.html").write_bytes(b"published")
         migrations = b'{"migrations":3}'
         discovery = json.dumps({"issuer": ISSUER}).encode()
-        fetch.side_effect = [migrations, discovery, b"published"]
-        wait_ready(b"published")
+        fetch.side_effect = [migrations, discovery]
+        wait_ready(web, b"published")
+        self.assertEqual([call.args[0] for call in fetch.call_args_list], [
+            "http://127.0.0.1:38080/api/ready",
+            "http://127.0.0.1:38081/auth/realms/industrial/.well-known/openid-configuration",
+        ])
         for responses in ([b'{"migrations":0}'], [migrations, b'{"issuer":"wrong"}'],
-                          [migrations, discovery, b"previous"]):
+                            [migrations, discovery]):
             with self.subTest(responses=responses), patch("time.monotonic", side_effect=[0, 121]):
                 fetch.side_effect = responses
-                with self.assertRaisesRegex(RuntimeError, "Public release checks failed"):
-                    wait_ready(b"published")
+                with self.assertRaisesRegex(RuntimeError, "Origin release checks failed"):
+                    wait_ready(web, b"different")
 
 
 if __name__ == "__main__":

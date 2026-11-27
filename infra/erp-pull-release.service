@@ -1,0 +1,8 @@
+[Unit]
+Description=Buscar o pacote verificado do ERP no GitHub Actions
+ConditionPathExists=%h/.config/erp-industrial/actions-token
+
+[Service]
+Type=oneshot
+UMask=0077
+ExecStart=/usr/bin/python3 %h/.local/lib/erp-industrial/pull_release.py
