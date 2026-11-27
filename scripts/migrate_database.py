@@ -106,6 +106,21 @@ def require_versions(cursor, supported):
     versions = {version for version, _ in history}
     if not {"1", "2", "5"} <= versions <= supported or not all(ok for _, ok in history):
         raise ValueError("Unsupported Flyway history. Prepare the scoped source and core-only target.")
+    return versions
+
+
+def require_empty_stock_target(sql):
+    versions = require_versions(sql, {"1", "2", "5", "7", "9", "10", "12", "13", "15"})
+    if "7" in versions:
+        # The PostgreSQL source predates inventory. Any stock account on the target
+        # signals that local operations have already started after cutover.
+        sql.execute("select 1 from stock_account limit 1")
+        if sql.fetchone() is not None:
+            raise ValueError("Destination already contains stock. Use a fresh target for the transfer.")
+    if "9" in versions:
+        sql.execute("select 1 from production_order limit 1")
+        if sql.fetchone() is not None:
+            raise ValueError("Destination already contains production orders. Use a fresh target for the transfer.")
 
 
 def require_supported_schema(source, sql):
@@ -122,7 +137,7 @@ def require_supported_schema(source, sql):
         raise ValueError("Unsupported source schema. Upgrade the PostgreSQL staging copy first.")
     with source.cursor() as cursor:
         require_versions(cursor, {"1", "2", "3", "4", "5", "6"})
-    require_versions(sql, {"1", "2", "5"})
+    require_empty_stock_target(sql)
 
 
 def copy_rows(source, sql):

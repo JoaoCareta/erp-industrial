@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import Keycloak from "keycloak-js";
 import { Workspace } from "./Workspace";
 import "./style.css";
+import "./motion.css";
 
 const root = createRoot(document.getElementById("root")!);
 const origin = window.location.origin;
@@ -29,5 +30,5 @@ identity
     );
   })
   .catch(() =>
-    root.render(<p>Login indisponível. Recarregue para tentar novamente.</p>),
+    root.render(<p role="alert">Login indisponível. Recarregue para tentar novamente.</p>),
   );

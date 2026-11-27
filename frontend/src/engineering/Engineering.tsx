@@ -181,6 +181,7 @@ export function Engineering({ api, run, canEdit, canPublish }: Props) {
           .map((i) => (
             <li key={i.id}>
               <button
+                aria-pressed={id === i.id}
                 onClick={() => {
                   setId(i.id);
                   setValue(i.value);
@@ -302,6 +303,7 @@ function Sheets({
             {versions.map((v) => (
               <button
                 key={v}
+                aria-pressed={!editing && view?.version === v}
                 onClick={() =>
                   run(async () => {
                     setView(await api<Snapshot>(base + "/versions/" + v));
@@ -314,7 +316,7 @@ function Sheets({
             ))}
           </div>
           {view && !editing && (
-            <article>
+            <article key={view.version} className="published-sheet">
               <h3>
                 {view.product.value.name} · V{view.version}
               </h3>

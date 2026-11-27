@@ -17,8 +17,26 @@ test("publica V1 e V2 e preserva a composição e o roteiro", async ({
     ].includes(label)
       ? page.getByRole("combobox", { name: label, exact: true })
       : page.getByLabel(label, { exact: true });
-  await click("Engenharia");
-  await click("Novo");
+  for (const reducedMotion of ["reduce", "no-preference"] as const) {
+    await page.emulateMedia({ reducedMotion });
+    await click("Engenharia");
+    const module = page.getByRole("main");
+    await expect(module.getByRole("heading", { name: "Engenharia", level: 1 })).toBeVisible();
+    await click("Novo");
+    const catalog = page.locator(".catalog-panel");
+    await expect(catalog.getByLabel("Código", { exact: true })).toBeVisible();
+    for (const surface of [module, catalog]) {
+      if (reducedMotion === "reduce") {
+        await expect(surface).toHaveCSS("animation-name", "none");
+      } else {
+        await expect(surface).not.toHaveCSS("animation-name", "none");
+      }
+    }
+    if (reducedMotion === "reduce") {
+      await click("Fechar cadastros");
+      await click("Equipe");
+    }
+  }
   for (const [kind, code, name] of [
     ["category", "MAD", "Madeira"],
     ["unit", "PL", "Placa"],
@@ -69,6 +87,7 @@ test("publica V1 e V2 e preserva a composição e o roteiro", async ({
   await chip("pintura").dragTo(chip("lixamento"));
   await expect(route.getByRole("button")).toHaveText(["corte","pintura","lixamento"]);
   await chip("lixamento").dragTo(chip("pintura"));
+  await expect(route.getByRole("button")).toHaveText(["corte","lixamento","pintura"]);
   await field("Quantidade por produto").fill("0.75");
   await click("Publicar ficha");
   await click("Consultar V2");

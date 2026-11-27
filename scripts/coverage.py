@@ -11,8 +11,12 @@ MODULES = {
     "backend/fundacao": "src/main/kotlin/erp/",
     "backend/acesso": "src/main/kotlin/erp/access/",
     "backend/engenharia": "src/main/kotlin/erp/engineering/",
+    "backend/estoque": "src/main/kotlin/erp/stock/",
+    "backend/producao": "src/main/kotlin/erp/production/",
     "frontend/acesso": "frontend/src/",
     "frontend/engenharia": "frontend/src/engineering/",
+    "frontend/estoque": "frontend/src/stock/",
+    "frontend/producao": "frontend/src/production/",
 }
 
 

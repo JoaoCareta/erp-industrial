@@ -4,6 +4,18 @@ O plano mestre anterior previa todos os grandes fluxos industriais e comerciais 
 
 RH, folha, ponto, contas a pagar e a receber, caixa e DRE ficam nos sistemas existentes da empresa. O ERP Fábrica mantém o acesso individual de operadores e líderes, fornecedores e terceiros, quantidades e valores de compra e venda, custo industrial por hora e custo dos serviços externos. O intercâmbio de dados com outro sistema depende de contratação e especificação próprias.
 
+## Decisões da fábrica em 27/11/2026
+
+O cliente confirmou as decisões abaixo, conforme retorno repassado pelo interlocutor do projeto em 27/11. Elas atualizam o levantamento anterior desta página.
+
+| Tema | Decisão e exemplo de aplicação |
+|---|---|
+| Custo por etapa | O valor da hora varia por etapa. No custo de um produto que passa por corte e pintura, aplicar a taxa de cada etapa ao respectivo tempo e somar os custos. Os valores reais ainda precisam ser informados. |
+| Abrangência | O piloto abrange a fábrica toda. O corte a laser ilustrado na tela de acesso é um exemplo de posto. A seleção de setor deve respeitar as permissões individuais. |
+| Interface | O cliente escolheu a proposta [Estação de turno](ui/02-estacao-de-turno.pdf) como referência visual para acesso, Kanban, ordem de produção e dashboard do turno. Os nomes, números e papéis ilustrados são exemplos. |
+
+**Apontamento de produção.** No áudio das 19h52 de 26/11, o cliente atribuiu a liberação das ordens à direção. Falta identificar quem pode registrar as quantidades produzidas. O fluxo pode ser desenvolvido e testado com contas sintéticas. A concessão na fábrica depende dessa resposta.
+
 ## Conferência por funcionalidade
 
 | Funcionalidade | Cobertura anterior | Campos e comportamentos a explicitar |

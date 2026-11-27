@@ -4,11 +4,33 @@ from unittest import TestCase, main
 from uuid import UUID
 
 from argparse import ArgumentTypeError
-from unittest.mock import patch
-from migrate_database import BOOTSTRAP, column_value, configured_host, endpoint_host, endpoint_name, endpoint_port, signature
+from unittest.mock import Mock, patch
+from migrate_database import BOOTSTRAP, column_value, configured_host, endpoint_host, endpoint_name, endpoint_port, require_empty_stock_target, signature
 
 
 class TransferTest(TestCase):
+    def test_transfer_rejects_a_target_with_orders_even_before_inventory(self):
+        cursor = Mock()
+        cursor.fetchall.return_value = [(v, 1) for v in ("1", "2", "5", "7", "9", "10", "12", "13", "15")]
+        cursor.fetchone.side_effect = [None, (1,)]
+        with self.assertRaisesRegex(ValueError, "already contains production orders"):
+            require_empty_stock_target(cursor)
+        cursor.fetchone.side_effect = [None, None]
+        require_empty_stock_target(cursor)
+
+    def test_transfer_preserves_operational_stock_on_a_migrated_target(self):
+        cursor = Mock()
+        cursor.fetchall.return_value = [(v, 1) for v in ("1", "2", "5", "7")]
+        cursor.fetchone.return_value = (1,)
+        with self.assertRaisesRegex(ValueError, "already contains stock"):
+            require_empty_stock_target(cursor)
+        cursor.fetchone.return_value = None
+        require_empty_stock_target(cursor)
+        cursor.fetchall.return_value = [(v, 1) for v in ("1", "2", "5")]
+        cursor.reset_mock()
+        require_empty_stock_target(cursor)
+        cursor.fetchone.assert_not_called()
+
     @patch.dict("os.environ", {"ERP_TARGET_HOST": "maria.internal"})
     def test_cli_cannot_redirect_credentials_to_another_host(self):
         self.assertEqual(configured_host("target", "maria.internal"), "maria.internal")

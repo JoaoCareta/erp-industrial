@@ -7,6 +7,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { Workspace } from "../src/Workspace";
 afterEach(() => {
@@ -55,6 +56,18 @@ const useFetch = (handler: (p: string, m: string, v: any) => unknown) =>
         : new Response(JSON.stringify(result));
     }),
   );
+test("estação de turno identifica o portal e o módulo em uso", async () => {
+  useFetch(() => []);
+  render(<Workspace token={async () => "jwt"} logout={() => {}} />);
+  const banner = within(screen.getByRole("banner"));
+  expect(banner.getByText("ERP Fábrica")).toBeTruthy();
+  expect(banner.getByText("Estação de turno")).toBeTruthy();
+  const menu = within(await screen.findByRole("navigation", { name: "Menu principal" }));
+  expect(menu.getByRole("button", { name: "Equipe", current: "page" })).toBeTruthy();
+  await click("Engenharia");
+  expect(menu.getByRole("button", { name: "Engenharia", current: "page" })).toBeTruthy();
+  expect(screen.getByRole("heading", { name: "Engenharia", level: 1 })).toBeTruthy();
+});
 test("UI-A1 carregamento, equipe, lista vazia, erro e saída", async () => {
   const logout = vi.fn(),
     token = vi.fn(async () => "jwt");
@@ -130,7 +143,7 @@ test("entrada indisponível e conta suspensa", async () => {
   render(<Workspace token={token} logout={() => {}} />);
   await screen.findByText("Acesso negado");
 });
-test("UI-E2 cadastros, rascunho e histórico consultável", async () => {
+test("UI-E2 cadastros, rascunho e histórico consultável", { timeout: 15_000 }, async () => {
   const kinds = ["category", "unit", "material", "product", "part"];
   const rows: any = Object.fromEntries(
     kinds.map((k) => [

@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Engineering } from "./engineering/Engineering";
+import { Stock } from "./stock/Stock";
+import { Production } from "./production/Production";
+import { Kanban } from "./production/Kanban";
+import { ApiError } from "./ApiError";
 
 export type RequestApi = <T>(
   path: string,
@@ -52,7 +56,7 @@ export function Workspace({
           if (path !== "me/context") reload((n) => n + 1);
           throw Error("Acesso negado");
         }
-        throw Error("Operação indisponível");
+        throw new ApiError(response.status);
       }
       const body = await response.text();
       return body ? JSON.parse(body) : undefined;
@@ -87,65 +91,74 @@ export function Workspace({
     select(id);
     localStorage.setItem("erp.plant." + context!.accountId, id);
   }
-  return (
-    <>
-      <header>
-        <strong>ERP Industrial</strong>
-        {context && context.units.length > 0 && (
-          <span>Grupo: {context.units[0].groupName}</span>
-        )}
-        {context && context.units.length > 1 ? (
-          <label>
-            Trocar unidade
-            <select value={selected} onChange={(e) => choose(e.target.value)}>
-              <option value="" disabled>
-                Escolha uma unidade
-              </option>
-              {context.units.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : (
-          plant && <span>Unidade: {plant.name}</span>
-        )}
-        <button onClick={logout}>Sair</button>
-      </header>
-      {plant ? (
-        <PlantWorkspace key={plant.id} plant={plant} request={request} />
-      ) : (
-        <main>
-          <h1>
-            {message ||
-              (!context
-                ? "Carregando…"
-                : context.units.length
-                  ? "Escolha uma unidade"
-                  : "Nenhuma unidade liberada")}
-          </h1>
-          {context?.units.length === 0 && (
-            <p>Fale com o administrador para solicitar acesso.</p>
-          )}
-        </main>
-      )}
-    </>
+  const unitPicker = context && context.units.length > 1 && (
+    <label className="unit-picker">
+      Trocar unidade
+      <select value={selected} onChange={(e) => choose(e.target.value)}>
+        <option value="" disabled>Escolha uma unidade</option>
+        {context.units.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+      </select>
+    </label>
   );
+  const controls = (
+    <div className="station-controls">
+      <div className="station-context">
+        {context && context.units.length > 0 && <span>Grupo: {context.units[0].groupName}</span>}
+        {plant && !unitPicker && <span>Unidade: {plant.name}</span>}
+      </div>
+      {plant && unitPicker}
+      <button type="button" onClick={logout}>Sair</button>
+    </div>
+  );
+  if (plant) {
+    return <PlantWorkspace key={plant.id} plant={plant} request={request} controls={controls} accountId={context!.accountId} />;
+  }
+  return <>
+    <StationHeader controls={controls} />
+    <main className="workspace-content">
+      <h1 key={message || (context ? "ready" : "loading")} className="workspace-status">
+        {message || (!context ? "Carregando…" :
+          context.units.length ? "Escolha uma unidade" : "Nenhuma unidade liberada")}
+      </h1>
+      {unitPicker}
+      {context?.units.length === 0 && <p>Fale com o administrador para solicitar acesso.</p>}
+    </main>
+  </>;
+}
+
+function StationHeader({ controls, children }: { controls: React.ReactNode; children?: React.ReactNode }) {
+  return <header className="station-header">
+    <div className="station-bar">
+      <div className="station-brand"><strong>ERP Fábrica</strong><span>Estação de turno</span></div>
+      {children}
+      {controls}
+    </div>
+  </header>;
 }
 
 function PlantWorkspace({
   plant,
   request,
+  controls,
+  accountId,
 }: {
   plant: Plant;
   request: RequestApi;
+  controls: React.ReactNode;
+  accountId: string;
 }) {
   const pages = [
     "Equipe",
     ...(plant.actions.includes("engineering.read") ? ["Engenharia"] : []),
+    ...(plant.actions.includes("stock.read") ? ["Estoque"] : []),
+    ...(plant.actions.includes("production.read") ? ["Kanban", "Ordens de produção"] : []),
   ];
   const [page, setPage] = useState("Equipe");
+  const [orderTarget, setOrderTarget] = useState("");
+  function show(name: string, orderId = "") {
+    setOrderTarget(orderId);
+    setPage(name);
+  }
   const api: RequestApi = useCallback(
     (path, method, data) =>
       request(
@@ -156,31 +169,43 @@ function PlantWorkspace({
     [plant.id, request],
   );
   return (
-    <div className={pages.length > 1 ? "workspace-with-sidebar" : undefined}>
-      {pages.length > 1 && (
-        <nav className="workspace-sidebar" aria-label="Menu principal">
-          {pages.map((p) => (
-            <button
-              key={p}
-              aria-current={p === page ? "page" : undefined}
-              onClick={() => {
-                setPage(p);
-              }}
-            >
-              {p}
-            </button>
-          ))}
-        </nav>
-      )}
-      <main className="workspace-content">
-        <h1>{page}</h1>
+    <>
+      <StationHeader controls={controls}>
+        {pages.length > 1 && (
+          <nav className="station-nav" aria-label="Menu principal">
+            {pages.map((name) => (
+              <button
+                key={name}
+                type="button"
+                aria-label={name}
+                aria-current={name === page ? "page" : undefined}
+                onClick={() => show(name)}
+              >
+                {name === "Ordens de produção" ? <><span className="nav-order-long">{name}</span><span className="nav-order-short">Ordens</span></> : name}
+              </button>
+            ))}
+          </nav>
+        )}
+      </StationHeader>
+      <main className="workspace-content" key={page}>
+        {page !== "Ordens de produção" && page !== "Kanban" && <h1>{page}</h1>}
         {page === "Equipe" ? (
-          <fieldset><Team sectors={plant.sectors} api={api} /></fieldset>
+          <section aria-label="Consulta de equipe"><Team sectors={plant.sectors} api={api} /></section>
+        ) : page === "Estoque" ? (
+          <Stock api={api} canWrite={plant.actions.includes("stock.write")} accountId={accountId} plantId={plant.id} />
+        ) : page === "Ordens de produção" ? (
+          <Production api={api} accountId={accountId} plantId={plant.id}
+            initialOrder={orderTarget} openBoard={id => show("Kanban", id)}
+            canCreate={plant.actions.includes("production.create")}
+            canReceive={plant.actions.includes("production.receive")} canRelease={plant.actions.includes("production.release")} />
+        ) : page === "Kanban" ? (
+          <Kanban api={api} accountId={accountId} plantId={plant.id} initialOrder={orderTarget}
+            canReport={plant.actions.includes("production.report")} openOrder={id => show("Ordens de produção", id)} />
         ) : (
           <EngineeringPage api={api} plant={plant} />
         )}
       </main>
-    </div>
+    </>
   );
 }
 function EngineeringPage({ api, plant }: { api: RequestApi; plant: Plant }) {
@@ -195,8 +220,8 @@ function EngineeringPage({ api, plant }: { api: RequestApi; plant: Plant }) {
     }
   };
   return <>
-    <p role="status">{notice}</p>
-    <fieldset disabled={notice === "Carregando…"}>
+    <p role="status">{notice && <span key={notice}>{notice}</span>}</p>
+    <fieldset className="engineering-workspace" disabled={notice === "Carregando…"}>
       <Engineering api={api} run={run} canEdit={plant.actions.includes("engineering.edit")}
         canPublish={plant.actions.includes("engineering.publish")} />
     </fieldset>

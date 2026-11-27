@@ -1,0 +1,121 @@
+.login-pf, .login-pf body {
+  background: #0b1926;
+  color: #edf4fa;
+  color-scheme: dark;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* The right panel uses the cutting station drawing from the approved reference. */
+.login-pf-page {
+  --gutter: clamp(24px, 5vw, 96px);
+  min-height: 100svh;
+  padding: var(--gutter);
+  display: grid;
+  align-content: center;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: clamp(32px, 7vh, 80px);
+}
+
+.login-pf-page #kc-header {
+  margin: 0;
+  text-align: left;
+}
+
+#kc-header #kc-header-wrapper {
+  padding: 0;
+  color: #f2f6fb;
+  font-size: 1.45rem;
+  font-weight: 730;
+  letter-spacing: -.025em;
+  text-transform: none;
+  white-space: normal;
+}
+
+.login-pf-page .card-pf {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 34rem;
+  border: 0;
+  box-shadow: none;
+}
+
+#kc-header-wrapper small {
+  display: block;
+  margin-top: .45rem;
+  color: #b0c4d4;
+  font: 500 .75rem/1.5 ui-monospace, monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.login-pf-page .login-pf-header { text-align: left; }
+.login-pf-page #kc-page-title {
+  margin: 0 0 1.4rem;
+  color: #f2f6fb;
+  font-weight: 680;
+  font-size: clamp(1.9rem, 3.7vw, 3.4rem);
+  line-height: 1.09;
+  letter-spacing: -.045em;
+  text-align: left;
+}
+
+.login-pf-page label { color: #d8e6f0; }
+.login-pf-page .pf-c-form-control,
+.login-pf-page .pf-c-input-group .pf-c-button {
+  height: 3rem;
+  border: 1px solid #345068;
+  border-radius: 4px;
+  background: #152c3f;
+  color: #f2f6fb;
+}
+.login-pf-page .pf-c-input-group .pf-c-button::after { border: 0; }
+.login-pf-page #kc-login {
+  min-height: 3rem;
+  border: 0;
+  border-radius: 5px;
+  background: #ffc000;
+  color: #101a21;
+  font-weight: 700;
+}
+.login-pf-page #kc-login:hover { background: #ffd143; }
+.login-pf-page #kc-login:active { background: #efad00; }
+.login-pf-page a { color: #a5cfff; }
+.login-pf-page :focus-visible { outline: 3px solid #8bc8ff; outline-offset: 3px; }
+.login-pf-page .pf-c-form__helper-text.pf-m-error { color: #ffb9ae; }
+.login-pf-page #kc-info-wrapper { background: #142b3d; color: #edf4fa; }
+
+@media (min-width: 780px) {
+  .login-pf-page {
+    position: relative;
+    grid-template-columns: minmax(0, calc(46vw - 2 * var(--gutter)));
+  }
+  .login-pf-page::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 46%;
+    border-left: 1px solid #304c62;
+    background: url("../img/corte.png") center / contain no-repeat,
+      radial-gradient(circle, #284153 1px, transparent 1px) 0 0 / 36px 36px, #0e2235;
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .login-pf-page #kc-header, .login-pf-page .card-pf, .login-pf-page::after {
+    animation: station-appear 320ms cubic-bezier(.2,.75,.25,1) backwards;
+  }
+  .login-pf-page .card-pf { animation-delay: 60ms; }
+  .login-pf-page::after { animation-delay: 100ms; }
+  .login-pf-page .pf-c-alert { animation: station-appear 170ms ease-out; }
+  .login-pf-page #kc-login, .login-pf-page .pf-c-form-control {
+    transition: background-color 150ms ease-out, border-color 150ms ease-out;
+  }
+}
+
+@keyframes station-appear {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
