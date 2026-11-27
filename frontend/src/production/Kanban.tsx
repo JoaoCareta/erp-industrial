@@ -1,3 +1,4 @@
+import { encodePending, readPending, scopeId } from "./pending";
 import React, { useState } from "react";
 import type { RequestApi } from "../Workspace";
 import { useRead } from "../useRead";
@@ -36,18 +37,18 @@ function lanesFor(orders: Execution[]): Lane[] {
 export function Kanban({ api, accountId, plantId, canReport, initialOrder, openOrder }: {
   api: RequestApi; accountId: string; plantId: string; canReport: boolean; initialOrder: string; openOrder: (id: string) => void;
 }) {
-  const key = "erp.stage-report." + JSON.stringify([accountId, plantId]);
+  const key = "erp.stage-report." + JSON.stringify([scopeId(accountId), scopeId(plantId)]);
   const [target, select] = useState<WorkTarget | null>(null);
   const [orderId, filterOrder] = useState(initialOrder);
   const [stage, filterStage] = useState("");
-  const [pending, setPending] = useState<ReportIntent | null>(() => JSON.parse(sessionStorage.getItem(key) || "null"));
+  const [pending, setPending] = useState<ReportIntent | null>(() => readPending<ReportIntent>(key));
   function remember(intent: ReportIntent) {
-    sessionStorage.setItem(key, JSON.stringify(intent));
+    sessionStorage.setItem(key, encodePending(intent));
     setPending(intent);
   }
   function forget(intent: ReportIntent) {
     // A reply from an old screen may arrive while a new command is pending on this terminal.
-    if (sessionStorage.getItem(key) === JSON.stringify(intent)) {
+    if (JSON.stringify(readPending(key)) === JSON.stringify(intent)) {
       sessionStorage.removeItem(key);
       setPending(null);
     }

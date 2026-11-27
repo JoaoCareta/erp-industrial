@@ -1,3 +1,4 @@
+import { encodePending, readPending } from "./pending";
 import React, { useRef, useState } from "react";
 import type { RequestApi } from "../Workspace";
 import { ApiError } from "../ApiError";
@@ -12,7 +13,7 @@ export function FinishedKits({ api, path, storageKey, canReceive }: {
 }) {
   const url = path + "/finished-receipts";
   const balance = useRead<Balance>(api, url);
-  const [batch, setBatch] = useState<Batch | null>(() => JSON.parse(sessionStorage.getItem(storageKey) || "null"));
+  const [batch, setBatch] = useState<Batch | null>(() => readPending<Batch>(storageKey));
   const [editing, setEditing] = useState(false);
   const [amount, setAmount] = useState("");
   const [message, announce] = useState("");
@@ -21,7 +22,7 @@ export function FinishedKits({ api, path, storageKey, canReceive }: {
   async function receive() {
     if (sending.current) return;
     const intent = batch || { id: crypto.randomUUID(), quantity: Number(amount) };
-    sessionStorage.setItem(storageKey, JSON.stringify(intent));
+    sessionStorage.setItem(storageKey, encodePending(intent));
     setBatch(intent);
     sending.current = true;
     setBusy(true);
@@ -56,7 +57,7 @@ export function FinishedKits({ api, path, storageKey, canReceive }: {
         <form className="order-confirm order-form" onSubmit={e => { e.preventDefault(); void receive(); }}>
           <label>Kits conferidos<input autoFocus required type="number" min="1" max={totals.remaining} step="1"
             value={batch?.quantity ?? amount} disabled={!!batch} onChange={e => setAmount(e.target.value)} /></label>
-          <button disabled={busy}>{batch ? "Reenviar conferência" : "Confirmar entrada"}</button>
+          <button type="submit" disabled={busy}>{batch ? "Reenviar conferência" : "Confirmar entrada"}</button>
           {!batch && <button type="button" onClick={() => setEditing(false)}>Cancelar</button>}
         </form> : <button className="order-action" onClick={() => setEditing(true)}>Conferir kits</button>)}
     </>}

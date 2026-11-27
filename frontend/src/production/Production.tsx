@@ -1,3 +1,4 @@
+import { encodePending, readPending, scopeId } from "./pending";
 import React, { useRef, useState } from "react";
 import type { RequestApi } from "../Workspace";
 import { ApiError } from "../ApiError";
@@ -25,13 +26,13 @@ export function Production({ api, accountId, plantId, canCreate, canRelease, can
   api: RequestApi; accountId: string; plantId: string; canCreate: boolean; canRelease: boolean;
   canReceive: boolean; initialOrder: string; openBoard: (id: string) => void;
 }) {
-  const storageKey = "erp.production.create." + JSON.stringify([accountId, plantId]);
+  const storageKey = "erp.production.create." + JSON.stringify([scopeId(accountId), scopeId(plantId)]);
   const [view, navigate] = useState(initialOrder || "list");
   const back = () => navigate("list");
   if (view === "list") return <OrderList api={api} open={navigate} canCreate={canCreate}
     pending={sessionStorage.getItem(storageKey) !== null} />;
   if (view === "new") return <NewOrder api={api} storageKey={storageKey} back={back} open={navigate} />;
-  return <OrderDetail key={view} storageKey={JSON.stringify(["finished", accountId, plantId, view])} canReceive={canReceive} api={api} id={view} back={back} canRelease={canRelease} openBoard={openBoard} />;
+  return <OrderDetail key={view} storageKey={JSON.stringify(["finished", scopeId(accountId), scopeId(plantId), scopeId(view)])} canReceive={canReceive} api={api} id={view} back={back} canRelease={canRelease} openBoard={openBoard} />;
 }
 
 function OrderList({ api, open, canCreate, pending }: {
@@ -62,7 +63,7 @@ function Back({ back, disabled = false }: { back: () => void; disabled?: boolean
 function NewOrder({ api, storageKey, back, open }: {
   api: RequestApi; storageKey: string; back: () => void; open: (id: string) => void;
 }) {
-  const [pending, setPending] = useState<Intent | null>(() => JSON.parse(sessionStorage.getItem(storageKey) || "null"));
+  const [pending, setPending] = useState<Intent | null>(() => readPending<Intent>(storageKey));
   const [busy, setBusy] = useState(false);
   const sending = useRef(false);
   const [error, notify] = useState("");
@@ -71,7 +72,7 @@ function NewOrder({ api, storageKey, back, open }: {
     sending.current = true;
     setBusy(true);
     notify("");
-    const encoded = JSON.stringify(intent);
+    const encoded = encodePending(intent);
     // A lost response must keep the original order ID and payload across navigation and reload.
     sessionStorage.setItem(storageKey, encoded);
     setPending(intent);
