@@ -60,7 +60,7 @@ docker compose -p erp-industrial-dev up -d api
 docker compose -p erp-industrial-dev logs api
 ```
 
-Aguarde o log de inicialização da API e confirme as migrações V1, V2 e V5 bem-sucedidas. Pare a API durante toda a transferência.
+Aguarde o log de inicialização da API e confira V7 para Estoque, V9 para as OS, V10 para as reservas, V12 para consumo, V13 para apontamentos por etapa e V15 para entradas de kits acabados. Pare a API durante toda a transferência. A ferramenta recusa uma nova transferência para um destino que já tenha contas de estoque ou ordens de produção, inclusive rascunhos, para preservar as operações posteriores à virada.
 
 ```powershell
 docker compose -p erp-industrial-dev stop api

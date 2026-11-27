@@ -1,6 +1,11 @@
 {
   "realm": "industrial",
   "enabled": true,
+  "displayName": "ERP Fábrica",
+  "loginTheme": "estacao",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["pt-BR"],
+  "defaultLocale": "pt-BR",
   "sslRequired": "none",
   "registrationAllowed": false,
   "clients": [

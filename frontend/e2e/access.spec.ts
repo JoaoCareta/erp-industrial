@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { test, expect, type Page } from "@playwright/test";
 async function login(page: Page, user: string) {
   await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Acessar estação", exact: true })).toBeVisible();
   await page.locator("#username").fill(user);
   await page.locator("#password").fill("demo-industrial");
   await page.locator("#kc-login").click();
@@ -39,9 +40,14 @@ test("setor e suspensão com o mesmo token", async ({ page, browser }) => {
   await expect(admin.getByText("Ana", { exact: true })).toBeVisible();
   await expect(admin.getByRole("navigation", {name:"Menu principal"})).toBeVisible();
   await expect(admin.getByRole("button", {name:"Acessos"})).toHaveCount(0);
-  const sidebar = await admin.getByRole("navigation").boundingBox();
-  const content = await admin.getByRole("main").boundingBox();
-  expect(sidebar!.x + sidebar!.width).toBeLessThanOrEqual(content!.x);
+  await expect(admin.locator("html")).toHaveCSS("color-scheme", "dark");
+  for (const width of [1280, 390]) {
+    await admin.setViewportSize({ width, height: 800 });
+    const menu = await admin.getByRole("navigation", { name: "Menu principal" }).boundingBox();
+    const content = await admin.getByRole("main").boundingBox();
+    expect(menu!.y + menu!.height).toBeLessThanOrEqual(content!.y);
+    expect(await admin.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
   // Simulate an external account suspension in the disposable verification database.
   const project = process.env.ERP_VERIFY_PROJECT;
   if (!project || !/^erp-check-[a-f0-9]{32}$/.test(project)) throw Error("Use scripts/verify.ps1");

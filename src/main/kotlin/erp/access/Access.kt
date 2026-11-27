@@ -24,12 +24,18 @@ class Audit(private val db: JdbcTemplate) {
 /** Verifica a conta e a concessão vigentes no banco a cada operação protegida. */
 @Service
 class Access(private val db: JdbcTemplate, private val audit: Audit) {
-    fun check(jwt: Jwt, action: String, plant: String, sector: String? = null): String {
-        val groups = db.queryForList("""select distinct group_id from effective_action
-            where issuer=? and subject=? and plant_id=? and action=? and (sector_id is null or sector_id=?)""",
-            String::class.java, jwt.issuer.toString(), jwt.subject, plant, action, sector)
-        return groups.firstOrNull() ?: deny(jwt, action, "$plant/${sector.orEmpty()}")
-    }
+    fun check(jwt: Jwt, action: String, plant: String, sector: String? = null): String =
+        authorizedAccount(jwt,action,plant,sector).first
+
+    /** Verifica a concessão de fábrica e identifica o responsável para o histórico da operação. */
+    fun actorName(jwt: Jwt, action: String, plant: String): String = authorizedAccount(jwt,action,plant,null).second
+
+    private fun authorizedAccount(jwt: Jwt, action: String, plant: String, sector: String?): Pair<String,String> =
+        db.query("""select e.group_id,a.name from effective_action e join account a on a.id=e.account_id
+            where e.issuer=? and e.subject=? and e.plant_id=? and e.action=? and (e.sector_id is null or e.sector_id=?)
+            limit 1""", { row, _ -> row.getString("group_id") to row.getString("name") },
+            jwt.issuer.toString(), jwt.subject, plant, action, sector).firstOrNull()
+            ?: deny(jwt, action, "$plant/${sector.orEmpty()}")
     private fun deny(jwt: Jwt, action: String, target: String): Nothing {
         audit.denied(jwt.subject, action, target)
         throw ResponseStatusException(HttpStatus.FORBIDDEN)

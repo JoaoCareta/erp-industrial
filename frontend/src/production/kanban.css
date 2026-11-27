@@ -1,0 +1,81 @@
+.work-board, .work-detail { min-width: 0; }
+.kanban-title, .kanban-tools { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem 1.4rem; }
+.kanban-title { justify-content: space-between; padding-bottom: 1.5rem; border-bottom: 1px solid var(--edge); }
+.kanban-title h1, .work-detail h1 { margin-bottom: .45rem; }
+.kanban-tools { margin-block: 1rem 1.4rem; align-items: end; }
+.kanban-tools label { margin: 0; }
+.kanban-tools select { max-width: min(23rem, 100%); }
+.kanban-lanes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(13rem, 1fr);
+  gap: .65rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-bottom: 1rem;
+  scrollbar-color: var(--control-edge) var(--bar);
+}
+.kanban-lane {
+  --lane-color: #83b1df;
+  min-height: 16rem;
+  max-height: clamp(24rem, calc(100svh - 22rem), 48rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  margin: 0;
+  padding: .55rem;
+  background: var(--panel-inset);
+  border: 1px solid var(--edge);
+  border-top: .2rem solid var(--lane-color);
+  border-radius: .25rem;
+}
+.kanban-lane[data-tone=first] { --lane-color: var(--accent); }
+.kanban-lane[data-tone=done] { --lane-color: #84dba7; }
+.kanban-lane header {
+  position: sticky; top: -.55rem; z-index: 1; background: var(--panel-inset);
+  display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; padding: .6rem .15rem 1rem;
+}
+.kanban-lane h2 { font-size: 1.06rem; }
+.kanban-lane header span { background: var(--field); border-radius: 100px; padding: .05rem .45rem; font-size: .8rem; }
+.work-card {
+  display: grid; width: 100%; gap: .3rem; padding: .8rem .72rem;
+  color: var(--text); border-color: var(--edge); background: var(--panel); text-align: start;
+}
+.work-card + .work-card { margin-top: .5rem; }
+.work-card:hover:enabled, .work-card:focus-visible { border-color: var(--lane-color); }
+.work-card strong, .card-product, .work-detail h1 { overflow-wrap: anywhere; }
+.work-card .order-number { font-size: .78rem; }
+.card-product, .lane-empty { color: var(--muted); font-size: .84rem; font-weight: 400; }
+.card-quantity { margin-top: .3rem; font-size: .88rem; }
+.card-progress { display: flex; align-items: center; gap: .6rem; color: var(--lane-color); }
+.card-progress progress { flex: 1; width: 0; height: .35rem; border: 0; border-radius: .4rem; appearance: none; background: var(--edge); }
+.card-progress progress::-webkit-progress-bar { background: var(--edge); border-radius: .4rem; }
+.card-progress progress::-webkit-progress-value { border-radius: .4rem; background: var(--lane-color); }
+.card-progress progress::-moz-progress-bar { border-radius: .4rem; background: var(--lane-color); }
+.lane-empty { padding: .35rem .15rem; }
+.work-order-link { padding: .25rem .3rem; min-height: 2rem; font: 600 .95rem ui-monospace, monospace; color: var(--link); }
+.work-totals { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; }
+.work-totals div { border-top: 1px solid var(--edge); padding-top: .65rem; }
+.work-totals dt, .work-history time, .work-event small { color: var(--muted); font-size: .85rem; }
+.work-totals dd { margin: .3rem 0 0; font-size: 1.4rem; font-weight: 650; }
+.report-form, .work-pending { display: flex; align-items: end; flex-wrap: wrap; gap: .85rem; margin: 1.15rem 0 .3rem; }
+.report-form label { margin: 0; }
+.report-form p { flex-basis: 100%; }
+.work-amount input { width: 8rem; }
+.work-event { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: .2rem 1rem; border-top: 1px solid var(--edge); padding: .8rem 0; }
+.work-event small { grid-column: 1/-1; }
+.work-detail [role=alert] { color: #ffc5b9; }
+@media (max-width: 40rem) {
+  .kanban-lanes { grid-auto-columns: minmax(12.5rem, 78%); }
+  .kanban-tools label, .kanban-tools select { max-width: 100%; }
+  .work-event { grid-template-columns: 1fr auto; }
+  .work-event time { grid-column: 1/-1; }
+  .work-totals { gap: .6rem; }
+}
+@media (min-width: 80rem) {
+  .kanban-lanes { grid-auto-columns: minmax(10.8rem, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .work-board, .work-detail, .kanban-lane, .work-card, .work-detail section, .report-form,
+  .work-amount, .work-pending, .work-event { animation: station-panel-in 180ms var(--motion-enter); }
+  .work-detail [role=status], .work-board [role=status], .work-totals dd { animation: station-feedback-in 140ms ease-out; }
+}

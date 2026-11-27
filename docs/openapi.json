@@ -10,6 +10,690 @@
     }
   ],
   "paths": {
+    "/api/units/{plant}/production-orders/kanban": {
+      "get": {
+        "summary": "Consultar as OS liberadas e o andamento das peças por etapa, com production.read",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta ou apontamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderExecution"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida nesta fábrica"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/execution": {
+      "get": {
+        "summary": "Consultar roteiro, quantidades por etapa, materiais e histórico da OS liberada",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta ou apontamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderExecution"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida nesta fábrica"
+          },
+          "404": {
+            "description": "OS ausente nesta fábrica"
+          },
+          "409": {
+            "description": "OS ainda não liberada"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/reports/{requestId}": {
+      "put": {
+        "summary": "Apontar peças e consumo opcional, com production.read e production.report. Reenviar a mesma chave com os mesmos dados preserva peças e saldos.",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportStageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta ou apontamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderExecution"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Posição do roteiro ou quantidade inválida"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida nesta fábrica"
+          },
+          "404": {
+            "description": "OS ausente nesta fábrica"
+          },
+          "409": {
+            "description": "OS não liberada, quantidade indisponível na etapa, reserva insuficiente ou chave reutilizada com outros dados"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders": {
+      "get": {
+        "summary": "Listar as ordens da fábrica com production.read",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionOrder"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida na fábrica selecionada"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/products": {
+      "get": {
+        "summary": "Listar produtos e versões publicadas disponíveis para a OS",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductionProduct"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida na fábrica selecionada"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}": {
+      "get": {
+        "summary": "Consultar a ordem e sua ficha fixada pela criação",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrder"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida na fábrica selecionada"
+          },
+          "404": {
+            "description": "Ordem ausente nesta fábrica"
+          }
+        }
+      },
+      "put": {
+        "summary": "Criar rascunho com production.read e production.create. Reenviar o mesmo UUID e dados retorna a ordem existente.",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrder"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou quantidade inválida"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida na fábrica selecionada"
+          },
+          "404": {
+            "description": "Ficha publicada ausente no grupo"
+          },
+          "409": {
+            "description": "UUID usado para uma ordem com outros dados"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/release": {
+      "put": {
+        "summary": "Liberar a ordem e reservar todos os materiais em uma transação, com production.read e production.release. Repetir conserva a reserva.",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operação confirmada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou quantidade inválida"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida na fábrica selecionada"
+          },
+          "404": {
+            "description": "Ordem ausente nesta fábrica"
+          },
+          "409": {
+            "description": "Saldo, unidade ou precisão incompatível com a reserva solicitada"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/stock/materials": {
+      "get": {
+        "summary": "Listar materiais disponíveis e materiais com histórico nesta unidade",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta ou lançamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StockMaterial"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou lançamento inválido"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem permissão de Estoque nesta unidade"
+          },
+          "404": {
+            "description": "Material ou movimento de origem ausente"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/stock/materials/{materialId}": {
+      "get": {
+        "summary": "Consultar saldo e extrato do material",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta ou lançamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockStatement"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou lançamento inválido"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem permissão de Estoque nesta unidade"
+          },
+          "404": {
+            "description": "Material ou movimento de origem ausente"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/stock/materials/{materialId}/opening/{requestId}": {
+      "put": {
+        "summary": "Registrar inventário inicial",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Reenviar a mesma operação com a mesma chave e os mesmos dados preserva o saldo. A chave da operação é única na unidade da fábrica.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockEntry"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta ou lançamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockStatement"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou lançamento inválido"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem permissão de Estoque nesta unidade"
+          },
+          "404": {
+            "description": "Material ou movimento de origem ausente"
+          },
+          "409": {
+            "description": "Conflito com o histórico ou com a chave do lançamento"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/stock/materials/{materialId}/receipts/{requestId}": {
+      "put": {
+        "summary": "Registrar entrada de material",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Reenviar a mesma operação com a mesma chave e os mesmos dados preserva o saldo. A chave da operação é única na unidade da fábrica.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockEntry"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta ou lançamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockStatement"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou lançamento inválido"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem permissão de Estoque nesta unidade"
+          },
+          "404": {
+            "description": "Material ou movimento de origem ausente"
+          },
+          "409": {
+            "description": "Conflito com o histórico ou com a chave do lançamento"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/stock/materials/{materialId}/reversals/{requestId}": {
+      "put": {
+        "summary": "Estornar um lançamento pela origem",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "description": "Reenviar a mesma operação com a mesma chave e os mesmos dados preserva o saldo. A chave da operação é única na unidade da fábrica.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockReversal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta ou lançamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockStatement"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Identificador ou lançamento inválido"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Sem permissão de Estoque nesta unidade"
+          },
+          "404": {
+            "description": "Material ou movimento de origem ausente"
+          },
+          "409": {
+            "description": "Conflito com o histórico ou com a chave do lançamento"
+          }
+        }
+      }
+    },
     "/api/ready": {
       "get": {
         "summary": "Consultar migrações aplicadas",
@@ -715,6 +1399,169 @@
           }
         }
       }
+    },
+    "/api/units/{plant}/production-orders/{id}/finished-receipts": {
+      "get": {
+        "summary": "Consultar kits recebidos e estoque do produto",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta ou apontamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "received",
+                    "remaining",
+                    "stock"
+                  ],
+                  "properties": {
+                    "received": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "remaining": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "stock": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida nesta fábrica"
+          },
+          "404": {
+            "description": "OS ausente nesta fábrica"
+          }
+        }
+      }
+    },
+    "/api/units/{plant}/production-orders/{id}/finished-receipts/{requestId}": {
+      "put": {
+        "summary": "Conferir kits e registrar entrada com production.receive e production.read",
+        "parameters": [
+          {
+            "name": "plant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "quantity"
+                ],
+                "properties": {
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consulta ou apontamento confirmado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "received",
+                    "remaining",
+                    "stock"
+                  ],
+                  "properties": {
+                    "received": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "remaining": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "stock": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Posição do roteiro ou quantidade inválida"
+          },
+          "401": {
+            "description": "Credencial inválida"
+          },
+          "403": {
+            "description": "Ação não concedida nesta fábrica"
+          },
+          "404": {
+            "description": "OS ausente nesta fábrica"
+          },
+          "409": {
+            "description": "OS em rascunho, lote excedido ou chave reutilizada com outra quantidade"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -726,6 +1573,617 @@
       }
     },
     "schemas": {
+      "StageConsumption": {
+        "type": "object",
+        "required": [
+          "materialId",
+          "quantity"
+        ],
+        "properties": {
+          "materialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^[0-9]{1,12}(\\.[0-9]{1,6})?$",
+            "description": "Consumo real positivo, na unidade de referência do material da OS."
+          }
+        },
+        "nullable": true
+      },
+      "ReportStageInput": {
+        "type": "object",
+        "required": [
+          "pieceIndex",
+          "stepIndex",
+          "quantity"
+        ],
+        "properties": {
+          "pieceIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "stepIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "consumption": {
+            "$ref": "#/components/schemas/StageConsumption"
+          }
+        }
+      },
+      "OrderStage": {
+        "type": "object",
+        "required": [
+          "stepIndex",
+          "name",
+          "available",
+          "completed"
+        ],
+        "properties": {
+          "stepIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          },
+          "available": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Quantidade de peças em inteiro decimal exato."
+          },
+          "completed": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Quantidade de peças em inteiro decimal exato."
+          }
+        }
+      },
+      "ExecutionPiece": {
+        "type": "object",
+        "required": [
+          "pieceIndex",
+          "name",
+          "total",
+          "steps"
+        ],
+        "properties": {
+          "pieceIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          },
+          "total": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Quantidade de peças em inteiro decimal exato."
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderStage"
+            }
+          }
+        }
+      },
+      "ExecutionMaterial": {
+        "type": "object",
+        "required": [
+          "materialId",
+          "name",
+          "unitCode",
+          "initial",
+          "consumed",
+          "remaining"
+        ],
+        "properties": {
+          "materialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "initial": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "consumed": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "remaining": {
+            "$ref": "#/components/schemas/StockQuantity"
+          }
+        }
+      },
+      "StageReport": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "pieceIndex",
+          "stepIndex",
+          "quantity",
+          "consumption",
+          "actor",
+          "occurredAt"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pieceIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "stepIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "consumption": {
+            "$ref": "#/components/schemas/StageConsumption"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "OrderExecution": {
+        "type": "object",
+        "required": [
+          "orderId",
+          "number",
+          "productName",
+          "quantity",
+          "version",
+          "pieces",
+          "materials",
+          "reports"
+        ],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "pieces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionPiece"
+            }
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExecutionMaterial"
+            }
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StageReport"
+            }
+          }
+        }
+      },
+      "ProductionProduct": {
+        "type": "object",
+        "required": [
+          "productId",
+          "code",
+          "name",
+          "version"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "CreateOrder": {
+        "type": "object",
+        "required": [
+          "productId",
+          "version",
+          "quantity"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "OrderMaterial": {
+        "type": "object",
+        "required": [
+          "materialId",
+          "name",
+          "unitId",
+          "unitCode",
+          "perKit",
+          "required"
+        ],
+        "properties": {
+          "materialId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "perKit": {
+            "type": "string",
+            "description": "Quantidade decimal exata, em unidade de referência, com ponto decimal."
+          },
+          "required": {
+            "type": "string",
+            "description": "Quantidade decimal exata, em unidade de referência, com ponto decimal."
+          }
+        }
+      },
+      "OrderPiece": {
+        "type": "object",
+        "required": [
+          "name",
+          "perKit",
+          "steps"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "perKit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProductionOrder": {
+        "type": "object",
+        "required": [
+          "id",
+          "number",
+          "productId",
+          "productCode",
+          "productName",
+          "version",
+          "quantity",
+          "status",
+          "createdAt",
+          "releasedAt",
+          "materials",
+          "pieces"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productCode": {
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "released"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "releasedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "materials": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderMaterial"
+            }
+          },
+          "pieces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderPiece"
+            }
+          }
+        }
+      },
+      "StockBalance": {
+        "type": "object",
+        "description": "Saldos do material na fábrica consultada e extrato em ordem de lançamento.",
+        "required": [
+          "physical",
+          "reserved",
+          "available",
+          "unitCode",
+          "movements"
+        ],
+        "properties": {
+          "physical": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "reserved": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "available": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StockMovement"
+            }
+          }
+        }
+      },
+      "StockQuantity": {
+        "type": "string",
+        "description": "Quantidade decimal na unidade do material, com ponto decimal e até seis casas.",
+        "example": "100"
+      },
+      "StockMaterial": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "unitId",
+          "unitCode",
+          "canReceive"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "canReceive": {
+            "type": "boolean",
+            "description": "Permite novas entradas com o material e a unidade atuais."
+          }
+        }
+      },
+      "StockEntry": {
+        "type": "object",
+        "required": [
+          "unitId",
+          "quantity"
+        ],
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^[0-9]{1,12}(\\.[0-9]{1,6})?$",
+            "description": "Quantidade maior que zero em DECIMAL(18,6).",
+            "example": "100"
+          }
+        }
+      },
+      "StockReversal": {
+        "type": "object",
+        "required": [
+          "sourceId"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "StockMovement": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "kind",
+          "quantity",
+          "sourceId",
+          "orderId",
+          "reportId",
+          "occurredAt"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "opening",
+              "receipt",
+              "reversal",
+              "consumption"
+            ]
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "OS da baixa de produção na fábrica consultada."
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Apontamento que registrou o consumo do material."
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "StockStatement": {
+        "type": "object",
+        "required": [
+          "physical",
+          "reserved",
+          "available",
+          "unitCode",
+          "movements"
+        ],
+        "properties": {
+          "physical": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "reserved": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "available": {
+            "$ref": "#/components/schemas/StockQuantity"
+          },
+          "unitCode": {
+            "type": "string"
+          },
+          "movements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StockMovement"
+            }
+          }
+        }
+      },
       "ItemInput": {
         "type": "object",
         "properties": {

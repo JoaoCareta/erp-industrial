@@ -1,0 +1,92 @@
+/* Keep the authorized view interactive as soon as it is mounted. */
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    --motion-enter: cubic-bezier(.2, .8, .2, 1);
+    --motion-control: 140ms ease-out;
+  }
+
+  @keyframes station-page-in {
+    from { opacity: .55; translate: 0 8px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  @keyframes station-panel-in {
+    from { opacity: .65; translate: 0 4px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  @keyframes station-feedback-in {
+    from { opacity: .55; }
+    to { opacity: 1; }
+  }
+
+  @keyframes station-nav-in {
+    from { scale: .4 1; opacity: .5; }
+    to { scale: 1; opacity: 1; }
+  }
+
+  .station-nav button[aria-current]::after {
+    animation: station-nav-in 180ms var(--motion-enter);
+  }
+
+  .workspace-content {
+    animation: station-page-in 220ms var(--motion-enter);
+  }
+
+  .workspace-status,
+  .workspace-content > .unit-picker,
+  .team-query + [role="status"],
+  .team-count,
+  .stock-detail > [role="status"],
+  .stock-detail > .stock-ledger,
+  [role="status"] > span,
+  [role="alert"],
+  .catalog-panel li,
+  .route-preview li,
+  .sheet-toolbar ~ .row > button {
+    animation: station-feedback-in 140ms ease-out;
+  }
+
+  .team-roster,
+  .stock-detail,
+  .stock-detail section,
+  .stock-detail tbody tr,
+  .catalog-panel,
+  .catalog-panel form label,
+  .published-sheet,
+  .sheet-editor,
+  .sheet-editor > fieldset,
+  .search-results,
+  details[open] > :not(summary) {
+    animation: station-panel-in 180ms var(--motion-enter);
+  }
+
+  :where(button, select, input, summary, a, .route-choices label) {
+    transition:
+      background-color var(--motion-control),
+      border-color var(--motion-control),
+      color var(--motion-control),
+      box-shadow var(--motion-control),
+      opacity var(--motion-control),
+      translate var(--motion-control);
+  }
+
+  :where(button:enabled:not([draggable=true]), summary):active {
+    translate: 0 1px;
+  }
+
+  /* Native disclosure owns focus and keyboard input throughout the transition. */
+  @supports (interpolate-size: allow-keywords) and selector(details::details-content) {
+    details::details-content {
+      interpolate-size: allow-keywords;
+      block-size: 0;
+      overflow-y: clip;
+      transition: block-size 180ms var(--motion-enter),
+        content-visibility 180ms allow-discrete;
+    }
+
+    details[open]::details-content {
+      block-size: auto;
+    }
+  }
+}

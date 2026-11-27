@@ -32,7 +32,7 @@ try {
     $env:PLAYWRIGHT_JUNIT_OUTPUT_NAME = '../reports/journeys.xml'
     Start-Erp $project 18081
     Frontend @('exec','--','playwright','install','chromium')
-    Frontend @('run','e2e','--','access.spec.ts','engineering.spec.ts')
+    Frontend @('run','e2e','--','access.spec.ts','engineering.spec.ts','stock.spec.ts','production.spec.ts')
     docker compose -p $project restart api
     Wait-Endpoint 'http://localhost:18081/api/ready'
     $env:PLAYWRIGHT_JUNIT_OUTPUT_NAME = '../reports/history.xml'
