@@ -36,6 +36,12 @@ class ProductionApi(private val access: Access, private val orders: ProductionOr
         val group = access.check(jwt,"production.create",plant)
         return orders.create(group,plant,id,input.productId,input.version.integerAtLeast(1),input.quantity.integerAtLeast(1),jwt.orderActor())
     }
+    @PutMapping("/{id}/closure") fun close(@AuthenticationPrincipal jwt: Jwt,@PathVariable plant: String,
+        @PathVariable id: UUID,@RequestBody input: Reason): ProductionOrder {
+        access.check(jwt,"production.read",plant)
+        access.check(jwt,"production.close",plant)
+        return orders.close(plant,id,jwt.orderActor(),input.checked())
+    }
     @PutMapping("/{id}/release") fun release(@AuthenticationPrincipal jwt: Jwt, @PathVariable plant: String, @PathVariable id: UUID): ProductionOrder {
         access.check(jwt,"production.read",plant)
         access.check(jwt,"production.release",plant)

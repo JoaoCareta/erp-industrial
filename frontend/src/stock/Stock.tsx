@@ -7,7 +7,7 @@ import { displayQuantity as display } from "../quantity";
 type Material = { id: string; code: string; name: string; unitId: string; unitCode: string; canReceive: boolean };
 type Kind = "opening" | "receipt" | "reversal" | "consumption";
 type Movement = { requestId: string; kind: Kind; sourceId: string | null; quantity: string; occurredAt: string };
-type Balance = { physical: string; reserved: string; available: string; unitCode: string; movements: Movement[] };
+type Balance = { physical: string; reserved: string; available: string; unitCode: string; movements: Movement[]; releases?: {orderId:string;quantity:string}[] };
 type Operation =
   | { kind: "opening" | "receipt"; quantity: string; unitId: string }
   | { kind: "reversal"; sourceId: string };
@@ -157,6 +157,8 @@ function MaterialStock({ api, canWrite, material, storageKey }: {
         </>}
       </> : <p>Novas entradas indisponíveis para este material.</p>}
     </section>}
+    {!!stock.value.releases?.length && <section><h2>Reservas liberadas por encerramento</h2>
+      <ul>{stock.value.releases.map(r=><li key={r.orderId}>OS {r.orderId} · {display(r.quantity,unitCode)} liberadas</li>)}</ul></section>}
     {movements.length ? <div className="stock-ledger">
       <table><caption>Extrato de movimentos</caption><thead><tr>
         <th>Data e hora</th><th>Movimento</th><th>Quantidade</th>{canWrite && <th>Ação</th>}

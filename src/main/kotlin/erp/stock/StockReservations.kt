@@ -14,7 +14,7 @@ data class ReservationLine(val materialId: UUID, val unitId: UUID, val quantity:
 @Service
 class StockReservations(private val db: JdbcTemplate) {
     internal fun reserved(plant: String, materialId: UUID): BigDecimal = db.queryForObject(
-        "select coalesce(sum(quantity - consumed),0) from stock_reservation where plant_id=? and material_id=?",
+        "select coalesce(sum(quantity - consumed - relinquished),0) from stock_reservation where plant_id=? and material_id=?",
         BigDecimal::class.java, plant, materialId)!!
 
     /**
@@ -51,12 +51,21 @@ class StockReservations(private val db: JdbcTemplate) {
         checkQuantity(quantity)
         lockAccount(plant, materialId)
         val changed = db.update("""update stock_reservation set consumed=consumed+?
-            where plant_id=? and material_id=? and order_id=? and quantity-consumed >= ?""",
+            where plant_id=? and material_id=? and order_id=? and quantity-consumed-relinquished >= ?""",
             quantity, plant, materialId, orderId, quantity)
         if (changed == 0) throw ResponseStatusException(HttpStatus.CONFLICT, "Saldo reservado insuficiente para esta OS")
         db.update("""insert into stock_movement(plant_id,material_id,request_id,kind,quantity,order_id,report_id,actor_issuer,actor_subject)
             values(?,?,?,'consumption',?,?,?,?,?)""",
             plant, materialId, UUID.randomUUID(), quantity.negate(), orderId, reportId, issuer, subject)
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    fun releaseRemaining(plant: String, order: UUID, materials: List<UUID>) {
+        for (material in materials.sorted()) {
+            lockAccount(plant,material)
+            db.update("update stock_reservation set relinquished=quantity-consumed where plant_id=? and material_id=? and order_id=?",
+                plant,material,order)
+        }
     }
 
     private fun checkQuantity(quantity: BigDecimal) {

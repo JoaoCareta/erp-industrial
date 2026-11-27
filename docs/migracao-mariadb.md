@@ -94,3 +94,7 @@ Registre as 12 contagens e hashes. Execute o comando de cópia novamente antes d
 ```
 
 Com um login existente, confira as unidades liberadas, uma equipe e o conteúdo de uma ficha histórica conhecida. Libere os escritores após o aceite. Para voltar antes da primeira escrita no MariaDB, pare a nova aplicação e reinicie o checkout PostgreSQL anterior com o nome de projeto, volume, emissor e parâmetros Flyway originais. Preserve os dois volumes durante a homologação. Após alterações no MariaDB, uma volta ao PostgreSQL requer conciliar as escritas posteriores ao corte.
+
+## Acesso e movimentos do piloto industrial
+
+A migração V17 incorpora as conferências anteriores ao saldo de acabados. A V29 atribui as ações operacionais ao perfil administrador no escopo da fábrica e permite registrar concessões individuais. Depois da migração, confira o saldo por produto e unidade e valide o acesso com um administrador e um líder de cada fábrica. O utilitário de transferência verifica se o destino já contém lançamentos industriais antes de copiar os dados.

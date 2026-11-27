@@ -5,6 +5,7 @@
 - [Requisitos industriais e vínculos às fórmulas do Excel](aderencia-requisitos-industriais.md)
 - [Escopo das três entregas, matriz de aceite e decisões em aberto](plano-fundacao-acesso-engenharia.md)
 - [Próximas entregas do piloto na fábrica toda](plano-piloto-fabrica.md)
+- [Sequência de implementação das funções da planilha após a PR #5](plano-paridade-industrial.md)
 - [Plano anterior e resultado das quatro entregas de 26/11](plano-quatro-entregas.md)
 - [Transferir e conferir os dados de uma instalação PostgreSQL no MariaDB](migracao-mariadb.md)
 - [Publicação na hospedagem da Mundo Eduk e deploy após merge](deploy.md)

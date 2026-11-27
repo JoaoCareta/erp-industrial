@@ -19,7 +19,8 @@ enum class MovementKind { opening, receipt, reversal, consumption }
 data class StockMaterial(val id: UUID, val code: String, val name: String, val unitId: UUID, val unitCode: String, val canReceive: Boolean)
 data class Movement(val requestId: UUID, val quantity: String, val occurredAt: Instant, val kind: MovementKind,
                     val sourceId: UUID?, val orderId: UUID?, val reportId: UUID?)
-data class Balance(val physical: String, val reserved: String, val available: String, val unitCode: String, val movements: List<Movement>)
+data class ReservationRelease(val orderId:UUID,val quantity:String)
+data class Balance(val physical: String, val reserved: String, val available: String, val unitCode: String, val movements: List<Movement>, val releases: List<ReservationRelease>)
 data class Actor(val issuer: String, val subject: String)
 private fun BigDecimal.decimalString() = stripTrailingZeros().toPlainString()
 private fun conflict(reason: String) = ResponseStatusException(HttpStatus.CONFLICT, reason)
@@ -54,8 +55,10 @@ class Stock(private val db: JdbcTemplate, private val catalog: StockCatalog, pri
         }, plant, reference.id)
         val physical = events.sumOf { it.quantity.toBigDecimal() }
         val reserved = reservations.reserved(plant, reference.id)
+        val releases=db.query("select order_id,relinquished from stock_reservation where plant_id=? and material_id=? and relinquished>0 order by order_id",
+            {r,_ -> ReservationRelease(r.getObject("order_id",UUID::class.java),r.getBigDecimal("relinquished").decimalString())},plant,reference.id)
         return Balance(physical.decimalString(), reserved.decimalString(), (physical - reserved).decimalString(),
-            reference.unitCode, events)
+            reference.unitCode, events,releases)
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)

@@ -11,7 +11,7 @@ import java.math.BigDecimal
 import java.util.UUID
 
 data class PublishedProduct(val productId: UUID, val code: String, val name: String, val version: Int)
-data class PublishedPiece(val name: String, val perKit: Int, val steps: List<String>)
+data class PublishedPiece(val name: String, val perKit: Int, val steps: List<String>, val partId:UUID?=null)
 data class PublishedRequirement(val materialId: UUID, val name: String, val unitId: UUID, val unitCode: String, val perKit: BigDecimal)
 data class ProductionSheet(val product: PublishedProduct, val pieces: List<PublishedPiece>, val materials: List<PublishedRequirement>)
 
@@ -34,7 +34,7 @@ class ProductionCatalog(private val db: JdbcTemplate, private val json: ObjectMa
             where i.group_id=? and p.product_id=? and p.version=?""",String::class.java,group,product,version)
             .singleOrNull() ?: throw ResponseStatusException(HttpStatus.NOT_FOUND,"Ficha publicada ausente")
         val saved = json.readValue<SavedSheet>(body)
-        val pieces = saved.sheet.pieces.zip(saved.parts) { line, part -> PublishedPiece(part.value.name,line.quantity,line.steps) }
+        val pieces = saved.sheet.pieces.zip(saved.parts) { line, part -> PublishedPiece(part.value.name,line.quantity,line.steps,line.partId) }
         val materials = saved.sheet.materials.zip(saved.materials) { line, names ->
             PublishedRequirement(line.materialId,names.material.value.name,line.unitId,names.unit.value.code,line.quantity)
         }

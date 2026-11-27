@@ -36,7 +36,8 @@ class UpgradeTest @Autowired constructor(val mvc: MockMvc, val json: ObjectMappe
         val context = json.readTree(mvc.get("/api/me/context") { with(user(2)) }
             .andExpect { status { isOk() } }.andReturn().response.contentAsString)
         val actions = json.treeToValue(context, erp.access.WorkContext::class.java).units.single().actions.toSet()
-        assertEquals(setOf("team.read","engineering.read","engineering.edit","engineering.publish"),actions)
+        val operational=db.queryForList("select action from operational_action",String::class.java).toSet()
+        assertEquals(setOf("team.read","engineering.read","engineering.edit","engineering.publish")+operational,actions)
         val product = reference["product"].stringValue()
         assertEquals("[1]",get("products/$product/versions",2).toString())
         assertEquals(snapshot(reference["sheet"]), snapshot(get("products/$product/versions/1",2)))

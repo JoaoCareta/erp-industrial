@@ -47,6 +47,15 @@ async function newOrder() {
   await enter("Quantidade de kits", "100");
 }
 
+test("a fila de divergências abre a OS correspondente", async () => {
+  portal(path => path === base + "/corrections" ? [{id:"question",orderId:draft.id,state:"pending",reason:"Conferir expedição"}] :
+    path === base ? [draft] : draft, [...grants,"production.correct"]);
+  await open();
+  await screen.findByText("Conferir expedição");
+  await click("Conferir divergência");
+  await screen.findByRole("heading",{name:product.name});
+});
+
 test("UI-OS criar e liberar a ordem de 100 kits confirma a reserva de 30 placas", async () => {
   let saved: typeof draft | undefined;
   let releaseCount = 0;
@@ -68,6 +77,10 @@ test("UI-OS criar e liberar a ordem de 100 kits confirma a reserva de 30 placas"
   await click("Criar OS");
   expect(await screen.findByRole("heading", { name: product.name, level: 1 })).toBeTruthy();
   expect(screen.getByText("Rascunho", { exact: true })).toBeTruthy();
+  const print = vi.spyOn(window,"print").mockImplementation(() => {});
+  await click("Imprimir OS");
+  expect(print).toHaveBeenCalledOnce();
+  print.mockRestore();
   const materials = screen.getByRole("region", { name: "Materiais da ordem" });
   expect(within(materials).getByText("0,3 PL")).toBeTruthy();
   expect(within(materials).getByText("30 PL")).toBeTruthy();
@@ -287,4 +300,20 @@ test("UI-OS recupera a consulta e atualiza o saldo após recusar um lote", async
   await click("Confirmar entrada");
   await screen.findByText(/Entrada recusada/);
   expect(sessionStorage.length).toBeLessThan(3);
+});
+
+test("encerramento preserva recebimentos e permite consultar o motivo", async () => {
+  let closed=false;
+  portal((path,init)=>{
+    if(path===base)return [released];
+    if(path.endsWith("/closure")){closed=true;return {...released,status:"closed",closureReason:"Fim do turno"};}
+    if(path.endsWith("/receipt-lines") || path.endsWith("/corrections"))return [];
+    return {...released,...(closed ? {status:"closed",closureReason:"Fim do turno"} : {})};
+  },[...grants,"production.close","production.correct"]);
+  await open();await click(/OS-0019/);
+  fireEvent.click(await screen.findByText("Encerrar OS"));
+  await enter("Motivo do encerramento","Fim do turno");await click("Confirmar encerramento");
+  expect(await screen.findByText("Encerrada",{exact:true})).toBeTruthy();
+  expect(await screen.findByText("Fim do turno")).toBeTruthy();
+  expect(screen.queryByRole("button",{name:"Confirmar encerramento"})).toBeNull();
 });

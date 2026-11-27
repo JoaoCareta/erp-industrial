@@ -1,3 +1,4 @@
+import { LaserPlanner } from "./LaserPlanner";
 import { MaterialPreview } from "./MaterialPreview";
 import React, { useEffect, useRef, useState } from "react";
 import type { RequestApi, Run } from "../Workspace";
@@ -334,6 +335,7 @@ function Sheets({
                   </li>
                 ))}
               </ul>
+              <LaserPlanner pieces={view.sheet.pieces.map((p,i) => ({...p, name:view.parts[i].value.name}))} />
               {canEdit && (
                 <button
                   onClick={() => {

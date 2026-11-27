@@ -8,8 +8,8 @@ import { ReadError } from "./WorkDetails";
 type Balance = { received: number; remaining: number; stock: number };
 type Batch = { id: string; quantity: number };
 
-export function FinishedKits({ api, path, storageKey, canReceive }: {
-  api: RequestApi; path: string; storageKey: string; canReceive: boolean;
+export function FinishedKits({ api, path, storageKey, canReceive, closed=false, onReceived }: {
+  api: RequestApi; path: string; storageKey: string; canReceive: boolean; closed?:boolean; onReceived?:()=>void;
 }) {
   const url = path + "/finished-receipts";
   const balance = useRead<Balance>(api, url);
@@ -32,6 +32,7 @@ export function FinishedKits({ api, path, storageKey, canReceive }: {
       setBatch(null);
       setAmount("");
       setEditing(false);
+      onReceived?.();
       announce("Entrada confirmada de " + intent.quantity + " kits.");
     } catch (e) {
       if (e instanceof ApiError && [400, 403, 404, 409].includes(e.status)) {
@@ -51,7 +52,7 @@ export function FinishedKits({ api, path, storageKey, canReceive }: {
     {totals === "error" ? <ReadError retry={balance.reload} /> : totals && <>
       <progress aria-label="Kits conferidos no lote" value={totals.received} max={totals.received + totals.remaining} />
       <dl className="order-log"><div><dt>Recebidos desta OS</dt><dd>{totals.received}</dd></div>
-        <div><dt>Por conferir</dt><dd>{totals.remaining}</dd></div>
+        <div><dt>{closed ? "Kits não produzidos" : "Por conferir"}</dt><dd>{totals.remaining}</dd></div>
         <div><dt>Saldo do produto na fábrica</dt><dd>{totals.stock} kits</dd></div></dl>
       {canReceive && (batch || totals.remaining > 0) && (editing || batch ?
         <form className="order-confirm order-form" onSubmit={e => { e.preventDefault(); void receive(); }}>

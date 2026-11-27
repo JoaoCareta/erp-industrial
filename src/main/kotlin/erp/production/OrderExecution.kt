@@ -49,7 +49,7 @@ private fun ProductionOrder.progress(reports: List<StageReport>): Execution {
     val materials = this.materials.map { material ->
         val used = consumed.getOrDefault(material.materialId,BigDecimal.ZERO)
         MaterialProgress(material.materialId,material.name,material.unitCode,material.required,used.display(),
-            (material.required.toBigDecimal() - used).display())
+            if (closedAt == null) (material.required.toBigDecimal() - used).display() else "0")
     }
     return Execution(id,number,productName,quantity,version,pieces,materials,reports)
 }
@@ -87,6 +87,7 @@ class OrderExecution(private val db: JdbcTemplate, private val orders: Productio
                 throw conflict("Chave de apontamento reutilizada com outros dados")
             return before
         }
+        if (order.closedAt != null) throw conflict("OS encerrada")
         val piece = before.pieces.getOrNull(command.pieceIndex)
         val step = piece?.steps?.getOrNull(command.stepIndex) ?: throw IllegalArgumentException("Etapa ausente no roteiro da peça")
         if (command.quantity.toLong() > step.available.toLong()) throw conflict("Quantidade acima do saldo disponível nesta etapa")

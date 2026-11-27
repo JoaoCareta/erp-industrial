@@ -1,6 +1,7 @@
 package erp.production
 
 import erp.access.Access
+import erp.stock.FinishedStock
 import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -17,13 +18,11 @@ data class FinishedBalance(val received: Int, val remaining: Int, val stock: Lon
 
 @RestController
 @RequestMapping("/api/units/{plant}/production-orders/{id}/finished-receipts")
-class FinishedReceipts(private val access: Access, private val orders: ProductionOrders, private val db: JdbcTemplate) {
+class FinishedReceipts(private val access: Access, private val orders: ProductionOrders, private val finished: FinishedStock, private val db: JdbcTemplate) {
     private fun balance(plant: String, order: ProductionOrder): FinishedBalance {
-        val received = db.queryForObject("select coalesce(sum(quantity),0) from finished_kit_receipt where plant_id=? and order_id=?",
+        val received = db.queryForObject("select coalesce(sum(effective_quantity),0) from finished_kit_receipt where plant_id=? and order_id=?",
             Int::class.java,plant,order.id)!!
-        val stock = db.queryForObject("""select coalesce(sum(r.quantity),0) from finished_kit_receipt r
-            join production_order o on o.id=r.order_id and o.plant_id=r.plant_id where o.plant_id=? and o.product_id=?""",
-            Long::class.java,plant,order.productId)!!
+        val stock = finished.balance(plant,order.productId).available
         return FinishedBalance(received,order.quantity-received,stock)
     }
 
@@ -47,10 +46,11 @@ class FinishedReceipts(private val access: Access, private val orders: Productio
         val previous = db.queryForList("select quantity from finished_kit_receipt where plant_id=? and order_id=? and request_id=?",
             Int::class.java,plant,id,requestId).singleOrNull()
         if (previous == quantity) return current
-        if (previous != null || order.releasedAt == null || quantity > current.remaining)
+        if (previous != null || order.status != "released" || quantity > current.remaining)
             throw ResponseStatusException(HttpStatus.CONFLICT,"Confira a liberação, o saldo da OS e o lote informado")
-        db.update("""insert into finished_kit_receipt(plant_id,order_id,request_id,quantity,actor_name,actor_subject,actor_issuer)
-            values(?,?,?,?,?,?,?)""",plant,id,requestId,quantity,actor,jwt.subject,jwt.issuer.toString())
+        db.update("""insert into finished_kit_receipt(plant_id,order_id,request_id,quantity,effective_quantity,actor_name,actor_subject,actor_issuer)
+            values(?,?,?,?,?,?,?,?)""",plant,id,requestId,quantity,quantity,actor,jwt.subject,jwt.issuer.toString())
+        finished.receive(plant,order.productId,quantity)
         return balance(plant,order)
     }
 }
